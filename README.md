@@ -1,3 +1,9 @@
+# Descriere proiect:
+
+Proiectul este inspirat din jocurile de tip "space-shooter"  și are în centrul atenției o navă spațială care se poate mișca la stânga sau dreapta din taste. Diverși inamici vor veni spre ea (fiind un joc de tip top-down) și vor putea fi invinși cu ajutorul proiectilelor emise de navă. Partea orientată pe obiecte este evidențiată de faptul că inamicii au rezistențe diferite și se pot transforma pe parcurs ce sunt atacați, reactionând cu nava în mod individual.
+
+
+
 # Nu primesc notă pentru că nu am pus titlu și descriere
 
 ### Folosiți template-ul corespunzător grupei voastre!
