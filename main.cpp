@@ -1,5 +1,8 @@
 #include <iostream>
 #include <string>
+#include <limits>
+#include <ostream>
+
 /*#include <array>
 #include "include/Example.h"
 // This also works if you do not want `include/`, but some editors might not like it
@@ -69,7 +72,7 @@ public:
         }
         return *this;
     }
-    ~Pozitie() {}
+    ~Pozitie()=default;
     int getX() const { return x; }
     int getY() const { return y; }
     void setX(int val) { x = val; }
@@ -87,7 +90,7 @@ class Arsenal {
     int putereAtac;
     std::string tipArma;
 public:
-    explicit Arsenal(std::string tip = "Laser", int mun = 40, int pwr = 10) : munitie(mun), tipArma(tip), putereAtac(pwr) {}
+    explicit Arsenal(std::string tip = "Laser", int mun = 40, int pwr = 10) : munitie(mun), putereAtac(pwr), tipArma(tip) {}
     Arsenal(const Arsenal& altul) : munitie(altul.munitie), putereAtac(altul.putereAtac), tipArma(altul.tipArma) {}
     Arsenal& operator= (const Arsenal& altul ) {
         if (this !=&altul) {
@@ -97,7 +100,7 @@ public:
         }
         return *this;
     }
-    ~Arsenal() {}
+    ~Arsenal()= default;
 
     bool trage() {
         if (munitie > 0) {
@@ -139,7 +142,7 @@ public:
         }
         return *this;
     }
-    ~NavaJucator() {}
+    ~NavaJucator()= default;
     void miscare(char tasta, int limitaX, int limitaY) {
         int nx = locatie.getX();
         int ny = locatie.getY();
@@ -205,12 +208,13 @@ int main() {
     MotorGrafic motor(30, 10);
     char tastaApasata = ' ';
 
-    while (tastaApasata != 'q'&& tastaApasata!='Q') {
+    while (std::cin >> tastaApasata) {
+        if (tastaApasata == 'q'||tastaApasata == 'Q') break;
+
         motor.scena(albuquerque);
         std::cout << "Input: ";
-        std::cin >> tastaApasata;
 
-        if (tastaApasata =='f'|| tastaApasata== 'F') {
+        if (tastaApasata =='f'||tastaApasata == 'F') {
             albuquerque.actiuneAtac();
         } else {
             albuquerque.miscare(tastaApasata, motor.getL(), motor.getH());
