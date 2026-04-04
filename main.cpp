@@ -90,7 +90,7 @@ class Arsenal {
     int putereAtac;
     std::string tipArma;
 public:
-    explicit Arsenal(std::string tip = "Laser", int mun = 40, int pwr = 10) : munitie(mun), putereAtac(pwr), tipArma(tip) {}
+    explicit Arsenal(const std::string& tip = "Laser", int mun = 40, int pwr = 10) : munitie(mun), putereAtac(pwr), tipArma(tip) {}
     Arsenal(const Arsenal& altul) : munitie(altul.munitie), putereAtac(altul.putereAtac), tipArma(altul.tipArma) {}
     Arsenal& operator= (const Arsenal& altul ) {
         if (this !=&altul) {
