@@ -22,7 +22,6 @@ public:
     int getX() const { return x; }
     int getY() const { return y; }
     void setX(int val) { x = val; }
-    void setY(int val) { y = val; }
 
     friend std::ostream& operator<<(std::ostream& os, const Pozitie& p) {
         os << "("<<p.x<<", "<<p.y<<")";
@@ -91,7 +90,7 @@ private:
     Arsenal armament;
     char aspect;
 public:
-    explicit NavaJucator(std::string nume, int startX, int startY)
+    explicit NavaJucator(const std::string& nume, int startX, int startY)
         : numeNava(nume), integritate(100), locatie(startX, startY), armament("Laser",40, 10), aspect('N') {}
     NavaJucator(const NavaJucator& alta)
         : numeNava(alta.numeNava + "_Backup"), integritate(alta.integritate),
@@ -171,7 +170,6 @@ public:
         std::cout << "\nComenzi: A/D (Miscare), F (Atac), Q (Exit)\n";
     }
     int getL() const { return lungime; }
-    int getH() const { return inaltime; }
 };
 
 
@@ -205,8 +203,8 @@ int main() {
         } else {
             albuquerque.miscare(tastaApasata, motor.getL());
         }
-        for (size_t i = 0; i < listaInamici.size(); i++) {
-            listaInamici[i].miscareInamic();
+        for (auto& inamic : listaInamici) {
+            inamic.miscareInamic();
         }
         for (size_t i = 0; i < listaInamici.size(); ) {
             if (listaInamici[i].getViata() <= 0 || listaInamici[i].getY() >= 10) {
