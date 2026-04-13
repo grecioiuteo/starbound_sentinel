@@ -44,7 +44,6 @@ public:
     int getY() const { return posY; }
     char getSimbol() const { return simbol; }
     int getViata() const { return viata; }
-    int getPuncte() const { return puncteRecompensa; }
 
     void scadeViata(int dmg);
 };
@@ -129,10 +128,6 @@ public:
     int x()const { return locatie.getX();}
     int y() const { return locatie.getY(); }
     char getAspect()const {return aspect; }
-    int getIntegritate() const { return integritate; }
-
-    void setScor(int s) { scorCurent = s; }
-    int getScor() const { return scorCurent; }
 
     friend std::ostream& operator<<(std::ostream& os, const NavaJucator& n) {
         os << "[" <<n.numeNava << "] HP: "<< n.integritate<< "% | AMMO: " << n.armament.getMunitie();
