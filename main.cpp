@@ -36,9 +36,9 @@ private:
     char simbol;
     int puncteRecompensa;
 public:
-    Inamic(int v, int x, int y, char s) : viata(v), posX(x), posY(y), simbol(s) {}
+    Inamic(int v, int x, int y, char s);
 
-    void miscareInamic() { posY++; }
+    void miscareInamic();
 
     int getX() const { return posX; }
     int getY() const { return posY; }
@@ -233,11 +233,11 @@ int main() {
         for (auto& inamic : listaInamici) {
             inamic.miscareInamic();
         }
-        for (size_t i = 0; i < listaInamici.size(); ) {
-            if (listaInamici[i].getViata() <= 0 || listaInamici[i].getY() >= 10) {
-                listaInamici.erase(listaInamici.begin() + i);
+        for (auto it = listaInamici.begin(); it != listaInamici.end(); ) {
+            if (it->getViata() <= 0 || it->getY() >= 10) {
+                it = listaInamici.erase(it);
             } else {
-                i++;
+                ++it;
             }
         }
         motor.scena(albuquerque, listaInamici);
