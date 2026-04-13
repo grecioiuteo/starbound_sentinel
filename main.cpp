@@ -34,6 +34,7 @@ private:
     int viata;
     int posX, posY;
     char simbol;
+    int puncteRecompensa;
 public:
     Inamic(int v, int x, int y, char s) : viata(v), posX(x), posY(y), simbol(s) {}
 
@@ -43,43 +44,56 @@ public:
     int getY() const { return posY; }
     char getSimbol() const { return simbol; }
     int getViata() const { return viata; }
+    int getPuncte() const { return puncteRecompensa; }
 
-    void scadeViata(int dmg) { viata = viata - dmg; }
+    void scadeViata(int dmg);
 };
+Inamic::Inamic(int v, int x, int y, char s)
+    : viata(v), posX(x), posY(y), simbol(s), puncteRecompensa(v * 2) {}
+void Inamic::miscareInamic() {
+    this->posY++;
+}
+void Inamic::scadeViata(int dmg) {
+    this->viata = this->viata - dmg;
+}
 
 class Arsenal {
     private:
     int munitie;
     int putereAtac;
     std::string tipArma;
+    int capacitateMaxima;
 public:
-    explicit Arsenal(const std::string& tip = "Laser", int mun = 40, int pwr = 10) : munitie(mun), putereAtac(pwr), tipArma(tip) {}
-    Arsenal(const Arsenal& altul) : munitie(altul.munitie), putereAtac(altul.putereAtac), tipArma(altul.tipArma) {}
+    explicit Arsenal(const std::string& tip = "Laser", int mun = 40, int pwr = 10) : munitie(mun), putereAtac(pwr), tipArma(tip), capacitateMaxima(40) {}
+    Arsenal(const Arsenal& altul) : munitie(altul.munitie), putereAtac(altul.putereAtac), tipArma(altul.tipArma), capacitateMaxima(altul.capacitateMaxima) {}
     Arsenal& operator= (const Arsenal& altul ) {
         if (this !=&altul) {
             munitie = altul.munitie;
             putereAtac= altul.putereAtac;
             tipArma = altul.tipArma;
+            capacitateMaxima = altul.capacitateMaxima;
         }
         return *this;
     }
     ~Arsenal()= default;
 
-    bool trage() {
-        if (munitie > 0) {
-            munitie--;
-            return true;
-        }
-        return false;
-    }
+    bool trage();
+    void reincarca();
     int getDmg() const { return putereAtac; }
     int getMunitie() const { return munitie; }
-    void reincarca() {
-        munitie = 40;
-        std::cout << "Munitie refacuta!\n";
-    }
 
 };
+bool Arsenal::trage() {
+    if (munitie > 0) {
+        munitie--;
+        return true;
+    }
+    return false;
+}
+void Arsenal::reincarca() {
+    this->munitie = this->capacitateMaxima;
+    std::cout << "Munitie refacuta!\n";
+}
 
 
 class NavaJucator {
@@ -89,23 +103,12 @@ private:
     Pozitie locatie;
     Arsenal armament;
     char aspect;
+    int scorCurent;
 public:
-    explicit NavaJucator(const std::string& nume, int startX, int startY)
-        : numeNava(nume), integritate(100), locatie(startX, startY), armament("Laser",40, 10), aspect('N') {}
-    NavaJucator(const NavaJucator& alta)
-        : numeNava(alta.numeNava + "_Backup"), integritate(alta.integritate),
-          locatie(alta.locatie), armament(alta.armament), aspect(alta.aspect) {}
+    explicit NavaJucator(const std::string& nume, int startX, int startY);
+    NavaJucator(const NavaJucator& alta);
+    NavaJucator& operator=(const NavaJucator& alta);
 
-    NavaJucator& operator=(const NavaJucator& alta) {
-        if (this != &alta) {
-            numeNava =alta.numeNava ;
-            integritate=alta.integritate;
-            locatie =alta.locatie;
-            armament=alta.armament ;
-            aspect=alta.aspect;
-        }
-        return *this;
-    }
     ~NavaJucator()= default;
     void miscare(char tasta, int limitaX) {
         int nx = locatie.getX();
@@ -126,6 +129,10 @@ public:
     int x()const { return locatie.getX();}
     int y() const { return locatie.getY(); }
     char getAspect()const {return aspect; }
+    int getIntegritate() const { return integritate; }
+
+    void setScor(int s) { scorCurent = s; }
+    int getScor() const { return scorCurent; }
 
     friend std::ostream& operator<<(std::ostream& os, const NavaJucator& n) {
         os << "[" <<n.numeNava << "] HP: "<< n.integritate<< "% | AMMO: " << n.armament.getMunitie();
@@ -135,6 +142,26 @@ public:
         armament.reincarca();
     }
 };
+NavaJucator::NavaJucator(const std::string& nume, int startX, int startY)
+    : numeNava(nume), integritate(100), locatie(startX, startY),
+      armament("Laser", 40, 10), aspect('N'), scorCurent(0) {}
+
+NavaJucator::NavaJucator(const NavaJucator& alta)
+    : numeNava(alta.numeNava + "_Backup"), integritate(alta.integritate),
+      locatie(alta.locatie), armament(alta.armament), aspect(alta.aspect), scorCurent(alta.scorCurent) {}
+
+NavaJucator& NavaJucator::operator=(const NavaJucator& alta) {
+    if (this != &alta) {
+        this->numeNava = alta.numeNava;
+        this->integritate = alta.integritate;
+        this->locatie = alta.locatie;
+        this->armament = alta.armament;
+        this->aspect = alta.aspect;
+        this->scorCurent = alta.scorCurent;
+    }
+    return *this;
+}
+
 class MotorGrafic {
 private:
     int lungime,inaltime;
@@ -154,9 +181,9 @@ public:
                     std::cout << nava.getAspect();
                     obiectDesenat = true;
                 } else {
-                    for (size_t i = 0; i < inamici.size(); i++) {
-                        if (inamici[i].getX() == x && inamici[i].getY() == y) {
-                            std::cout << inamici[i].getSimbol();
+                    for (const auto& in : inamici) {
+                        if (in.getX() == x && in.getY() == y) {
+                            std::cout << in.getSimbol();
                             obiectDesenat = true;
                             break;
                         }
