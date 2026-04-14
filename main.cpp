@@ -384,9 +384,11 @@ int main() {
         for (auto it = listaInamici.begin(); it != listaInamici.end(); ) {
             if (it->getViata() <= 0) {
                 stats.adaugaMoarte();
-                it =listaInamici.erase(it);
+                it = listaInamici.erase(it);
             }
             else if (it->getY() >= 10) {
+                albuquerque.primesteLovitura(20);
+                gm.addEvent("AVARIE: Inamicul a trecut de defensiva!");
                 InterfataUtilizator::afiseazaGameOver(stats.getScor());
                 return 0;
             }
@@ -443,6 +445,8 @@ int main() {
         motor.scena(albuquerque, listaInamici, listaDiamante, listaPowerUps);
         std::cout << "Input (A/D/F/Q): ";
     }
+    (void) albuquerque.getAtacTotal();
+    albuquerque.primesteLovitura(0);
     std::cout << "Inchidere...\n";
     NavaJucator backup =albuquerque;
     std::cout << "Backup creat:" <<backup <<"\n";
