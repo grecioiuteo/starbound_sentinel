@@ -3,6 +3,8 @@
 #include <limits>
 #include <ostream>
 #include <vector>
+#include <cstdlib>
+#include <ctime>
 
 
 class Pozitie {
@@ -54,6 +56,20 @@ void Inamic::miscareInamic() {
 void Inamic::scadeViata(int dmg) {
     this->viata = this->viata - dmg;
 }
+
+class Diamant {
+private:
+    int posX, posY;
+    char simbol;
+    int valoare;
+public:
+    Diamant(int x, int y) : posX(x), posY(y), simbol('*'), valoare(500) {}
+    void miscare() { posY++; }
+    int getX()const {return posX; }
+    int getY() const{ return posY; }
+    char getSimbol() const {return simbol;}
+    int getValoare() const {return valoare;}
+};
 
 class Arsenal {
     private:
@@ -156,26 +172,42 @@ NavaJucator& NavaJucator::operator=(const NavaJucator& alta) {
 
 class MotorGrafic {
 private:
-    int lungime,inaltime;
+    int lungime, inaltime;
 
 public:
     explicit MotorGrafic(int l = 30, int h = 10) : lungime(l), inaltime(h) {}
-    void scena(const NavaJucator& nava, const std::vector<Inamic>& inamici) {
-        for(int i = 0;i < 10;++i) std::cout << "\n";
+
+    void scena(const NavaJucator& nava, const std::vector<Inamic>& inamici, const std::vector<Diamant>& diamante) {
+        for(int i = 0; i < 10; ++i) std::cout << "\n";
         std::cout << nava << "\n";
         for (int i = 0; i < lungime + 2; i++) std::cout << "=";
         std::cout << "\n";
-        for (int y = 0;y < inaltime;y++) {
+
+        for (int y = 0; y < inaltime; y++) {
             std::cout << "|";
-            for (int x = 0; x < lungime;x++) {
+            for (int x = 0; x < lungime; x++) {
                 bool obiectDesenat = false;
+
+                // Prioritate 1: Nava
                 if (x == nava.x() && y == nava.y()) {
                     std::cout << nava.getAspect();
                     obiectDesenat = true;
-                } else {
+                }
+                // Prioritate 2: Inamici
+                if (!obiectDesenat) {
                     for (const auto& in : inamici) {
                         if (in.getX() == x && in.getY() == y) {
                             std::cout << in.getSimbol();
+                            obiectDesenat = true;
+                            break;
+                        }
+                    }
+                }
+                // Prioritate 3: Diamante
+                if (!obiectDesenat) {
+                    for (const auto& d : diamante) {
+                        if (d.getX() == x && d.getY() == y) {
+                            std::cout << d.getSimbol();
                             obiectDesenat = true;
                             break;
                         }
@@ -188,15 +220,45 @@ public:
         for (int i = 0; i < lungime + 2; i++) std::cout << "=";
         std::cout << "\nComenzi: A/D (Miscare), F (Atac), Q (Exit)\n";
     }
+
     int getL() const { return lungime; }
+};
+
+class Statistici {
+private:
+    int inamiciOmorati;
+public:
+    Statistici() : inamiciOmorati(0) {}
+    void adaugaMoarte() { inamiciOmorati++; }
+    int getScor() const { return inamiciOmorati * 100; }
+};
+
+class InterfataUtilizator {
+public:
+    static void afiseazaBanner() {
+        std::cout << "==============================\n";
+        std::cout << "   SPACE DEFENDER v1.0\n";
+        std::cout << "==============================\n";
+    }
+
+    static void afiseazaGameOver(int scor) {
+        std::cout << "\n******************************\n";
+        std::cout << "          GAME OVER          \n";
+        std::cout << "      Scor Final: " << scor << "\n";
+        std::cout << "******************************\n";
+    }
 };
 
 
 
 int main() {
+    srand(time(0));
+    InterfataUtilizator::afiseazaBanner();
     NavaJucator albuquerque("Interceptor", 15, 9);
     MotorGrafic motor(30, 10);
     std::vector<Inamic> listaInamici;
+    std::vector<Diamant> listaDiamante;
+    Statistici stats;
 
     listaInamici.push_back(Inamic(20, 5, 0, 'v'));
     listaInamici.push_back(Inamic(50, 20, 1, 'W'));
@@ -226,13 +288,40 @@ int main() {
             inamic.miscareInamic();
         }
         for (auto it = listaInamici.begin(); it != listaInamici.end(); ) {
-            if (it->getViata() <= 0 || it->getY() >= 10) {
-                it = listaInamici.erase(it);
-            } else {
+            if (it->getViata() <= 0) {
+                stats.adaugaMoarte();
+                it =listaInamici.erase(it);
+            }
+            else if (it->getY() >= 10) {
+                InterfataUtilizator::afiseazaGameOver(stats.getScor());
+                return 0;
+            }
+            else {
                 ++it;
             }
         }
-        motor.scena(albuquerque, listaInamici);
+        for (auto it = listaDiamante.begin(); it != listaDiamante.end(); ) {
+            it->miscare();
+            if (it->getX() == albuquerque.x() && it->getY() == albuquerque.y()) {
+                for(int i = 0; i < it->getValoare()/100; ++i) stats.adaugaMoarte();
+                std::cout << "DIAMANT COLECTAT! +500\n";
+                it = listaDiamante.erase(it);
+            }
+            else if (it->getY() >= 10) {
+                it = listaDiamante.erase(it);
+            }
+            else {
+                ++it;
+            }
+        }
+        if (rand() % 100 < 10) {
+            int xRandom = rand() % motor.getL();
+            listaInamici.push_back(Inamic(20, xRandom, 0, 'v'));
+        }
+        if (rand() % 100 < 5) {
+            listaDiamante.push_back(Diamant(rand() % motor.getL(), 0));
+        }
+        motor.scena(albuquerque, listaInamici, listaDiamante);
         std::cout << "Input (A/D/F/Q): ";
     }
     std::cout << "Inchidere...\n";
