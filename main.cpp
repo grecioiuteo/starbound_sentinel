@@ -133,6 +133,18 @@ void Arsenal::reincarca() {
     std::cout << "Munitie refacuta!\n";
 }
 
+class Proiectil {
+private:
+    int px, py;
+    bool activ;
+public:
+    Proiectil(int x, int y) : px(x), py(y), activ(true) {}
+    void miscare() { py--;if (py < 0) activ = false; }
+    int getX() const {return px; }
+    int getY() const{return py; }
+    bool esteActiv() const { return activ;}
+    void dezactiveaza() { activ= false; }
+};
 
 class NavaJucator {
 private:
@@ -204,7 +216,7 @@ NavaJucator::NavaJucator(const std::string& nume, int startX, int startY)
 NavaJucator::NavaJucator(const NavaJucator& alta)
     : numeNava(alta.numeNava + "_Backup"), integritate(alta.integritate),
       locatie(alta.locatie), armament(alta.armament), aspect(alta.aspect),
-      valoareScut(alta.valoareScut), bonusDamage(alta.bonusDamage) {} // Adauga astea doua
+      valoareScut(alta.valoareScut), bonusDamage(alta.bonusDamage) {}
 
 NavaJucator& NavaJucator::operator=(const NavaJucator& alta) {
     if (this != &alta) {
@@ -213,8 +225,8 @@ NavaJucator& NavaJucator::operator=(const NavaJucator& alta) {
         this->locatie = alta.locatie;
         this->armament = alta.armament;
         this->aspect = alta.aspect;
-        this->valoareScut = alta.valoareScut; // Adauga asta
-        this->bonusDamage = alta.bonusDamage; // Adauga asta
+        this->valoareScut = alta.valoareScut;
+        this->bonusDamage = alta.bonusDamage;
     }
     return *this;
 }
@@ -226,7 +238,7 @@ private:
 public:
     explicit MotorGrafic(int l = 30, int h = 10) : lungime(l), inaltime(h) {}
 
-    void scena(const NavaJucator& nava, const std::vector<Inamic>& inamici, const std::vector<Diamant>& diamante,const std::vector<PowerUp>& powerups) {
+    void scena(const NavaJucator& nava, const std::vector<Inamic>& inamici, const std::vector<Diamant>& diamante,const std::vector<PowerUp>& powerups, const std::vector<Proiectil>& proiectile) {
         for(int i = 0; i < 10; ++i) std::cout << "\n";
         std::cout << nava << "\n";
         for (int i = 0; i < lungime + 2; i++) std::cout << "=";
@@ -262,6 +274,15 @@ public:
                     for (const auto& p : powerups) {
                         if (p.getX() == x && p.getY() == y) {
                             std::cout << p.getSimbol();
+                            obiectDesenat = true;
+                            break;
+                        }
+                    }
+                }
+                if (!obiectDesenat) {
+                    for (const auto& p : proiectile) {
+                        if (p.getX() == x && p.getY() == y) {
+                            std::cout << "|";
                             obiectDesenat = true;
                             break;
                         }
@@ -348,6 +369,7 @@ int main() {
     std::vector<Inamic> listaInamici;
     std::vector<Diamant> listaDiamante;
     std::vector<PowerUp> listaPowerUps;
+    std::vector<Proiectil> listaProiectile;
     Statistici stats;
 
 
@@ -366,14 +388,9 @@ int main() {
             if (dmg == 0) {
                 albuquerque.executaReincarcare();
             } else {
-                for (size_t i = 0; i < listaInamici.size(); i++) {
-                    if (listaInamici[i].getX() == albuquerque.x()) {
-                        listaInamici[i].scadeViata(dmg);
-                    }
-                }
+                listaProiectile.push_back(Proiectil(albuquerque.x(), albuquerque.y() - 1));
+                gm.addEvent("FOC: Racheta lansata!");
             }
-        } else {
-            albuquerque.miscare(tastaApasata, motor.getL());
         }
         for (auto& inamic : listaInamici) {
             inamic.miscareInamic();
@@ -419,6 +436,21 @@ int main() {
                 ++it;
             }
         }
+        for (auto& p : listaProiectile) p.miscare();
+        for (auto& p : listaProiectile) {
+            if (!p.esteActiv()) continue;
+            for (auto& in : listaInamici) {
+                if (p.getX() == in.getX() && p.getY() == in.getY()) {
+                    in.scadeViata(albuquerque.getAtacTotal());
+                    p.dezactiveaza();
+                    gm.addEvent("Target Hit! Inamic lovit la " + std::to_string(p.getX()));
+                }
+            }
+        }
+        for (auto it = listaProiectile.begin(); it != listaProiectile.end(); ) {
+            if (!it->esteActiv()) it = listaProiectile.erase(it);
+            else ++it;
+        }
         if (rand() % 100 < 5) {
             std::string t = (rand() % 2 == 0) ? "Scut" : "FocRapid";
             listaPowerUps.push_back(PowerUp(rand() % motor.getL(), 0, t));
@@ -439,7 +471,7 @@ int main() {
         }
         gm.update(stats.getScor());
         gm.showStatus();
-        motor.scena(albuquerque, listaInamici, listaDiamante, listaPowerUps);
+        motor.scena(albuquerque, listaInamici, listaDiamante, listaPowerUps,listaProiectile);
         std::cout << "Input (A/D/F/Q): ";
     }
     (void) albuquerque.getAtacTotal();
