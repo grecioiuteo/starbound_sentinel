@@ -500,5 +500,11 @@ int main() {
     std::cout << "Inchidere...\n";
     NavaJucator backup =albuquerque;
     std::cout << "Backup creat:" <<backup <<"\n";
+    if (!listaInamici.empty()) {
+        (void)listaInamici[0].esteValid();
+        listaInamici[0].reseteazaStare();
+    }
+    (void)ManagerResurse::obtineMesajInfrangere(stats.getScor());
+    (void)ManagerResurse::verificaCompatibilitate("Interceptor");
     return 0;
 }
