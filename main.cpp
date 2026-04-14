@@ -273,7 +273,7 @@ public:
             log.push_back("--- NIVELUL "+ std::to_string(level)+" A INCEPUT ---");
         }
     }
-    void addEvent(std::string msg) {
+    void addEvent(const std::string& msg) {
         if (log.size() > 4) {
             log.erase(log.begin());
         }
