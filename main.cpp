@@ -236,13 +236,10 @@ public:
             std::cout << "|";
             for (int x = 0; x < lungime; x++) {
                 bool obiectDesenat = false;
-
-                // Prioritate 1: Nava
                 if (x == nava.x() && y == nava.y()) {
                     std::cout << nava.getAspect();
                     obiectDesenat = true;
                 }
-                // Prioritate 2: Inamici
                 if (!obiectDesenat) {
                     for (const auto& in : inamici) {
                         if (in.getX() == x && in.getY() == y) {
