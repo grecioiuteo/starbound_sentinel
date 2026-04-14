@@ -78,7 +78,23 @@ public:
     char getSimbol() const {return simbol;}
     int getValoare() const {return valoare;}
 };
-
+class PowerUp {
+private:
+    int px, py;
+    std::string tip;
+    char simbol;
+public:
+    PowerUp(int x, int y, const std::string& t) : px(x), py(y), tip(t) {
+        if (tip == "Scut") simbol = 'S';
+        else if (tip == "FocRapid") simbol = 'R';
+        else simbol = 'P';
+    }
+    void miscare() { py++; }
+    int getX() const { return px; }
+    int getY() const { return py; }
+    char getSimbol() const { return simbol; }
+    const std::string& getTip() const { return tip; }
+};
 class Arsenal {
     private:
     int munitie;
@@ -125,6 +141,8 @@ private:
     Pozitie locatie;
     Arsenal armament;
     char aspect;
+    int valoareScut;
+    int bonusDamage;
 public:
     explicit NavaJucator(const std::string& nume, int startX, int startY);
     NavaJucator(const NavaJucator& alta);
@@ -141,7 +159,7 @@ public:
     }
     int actiuneAtac() {
         if (armament.trage()) {
-            return armament.getDmg();
+            return armament.getDmg() + bonusDamage;
         } else {
             std::cout << "Eroare: Munitie insuficienta!\n";
             return 0;
@@ -152,20 +170,41 @@ public:
     char getAspect()const {return aspect; }
 
     friend std::ostream& operator<<(std::ostream& os, const NavaJucator& n) {
-        os << "[" <<n.numeNava << "] HP: "<< n.integritate<< "% | AMMO: " << n.armament.getMunitie();
+        os << "[" << n.numeNava << "] HP: " << n.integritate << "% | SCUT: " << n.valoareScut << " | AMMO: " << n.armament.getMunitie();
         return os;
     }
     void executaReincarcare() {
         armament.reincarca();
     }
+    void aplicaPowerUp(const std::string& tip) {
+        if (tip == "Scut") {
+            valoareScut = 50;
+        } else if (tip == "FocRapid") {
+            bonusDamage = 15;
+        }
+    }
+
+    void primesteLovitura(int dmg) {
+        if (valoareScut > 0) {
+            valoareScut -= dmg;
+            if (valoareScut < 0) valoareScut = 0;
+        } else {
+            integritate -= dmg;
+        }
+    }
+
+    int getAtacTotal() {
+        return armament.getDmg() + bonusDamage;
+    }
 };
 NavaJucator::NavaJucator(const std::string& nume, int startX, int startY)
     : numeNava(nume), integritate(100), locatie(startX, startY),
-      armament("Laser", 40, 10), aspect('N') {}
+      armament("Laser", 40, 10), aspect('N'), valoareScut(0), bonusDamage(0) {}
 
 NavaJucator::NavaJucator(const NavaJucator& alta)
     : numeNava(alta.numeNava + "_Backup"), integritate(alta.integritate),
-      locatie(alta.locatie), armament(alta.armament), aspect(alta.aspect) {}
+      locatie(alta.locatie), armament(alta.armament), aspect(alta.aspect),
+      valoareScut(alta.valoareScut), bonusDamage(alta.bonusDamage) {} // Adauga astea doua
 
 NavaJucator& NavaJucator::operator=(const NavaJucator& alta) {
     if (this != &alta) {
@@ -174,6 +213,8 @@ NavaJucator& NavaJucator::operator=(const NavaJucator& alta) {
         this->locatie = alta.locatie;
         this->armament = alta.armament;
         this->aspect = alta.aspect;
+        this->valoareScut = alta.valoareScut; // Adauga asta
+        this->bonusDamage = alta.bonusDamage; // Adauga asta
     }
     return *this;
 }
@@ -185,7 +226,7 @@ private:
 public:
     explicit MotorGrafic(int l = 30, int h = 10) : lungime(l), inaltime(h) {}
 
-    void scena(const NavaJucator& nava, const std::vector<Inamic>& inamici, const std::vector<Diamant>& diamante) {
+    void scena(const NavaJucator& nava, const std::vector<Inamic>& inamici, const std::vector<Diamant>& diamante,const std::vector<PowerUp>& powerups) {
         for(int i = 0; i < 10; ++i) std::cout << "\n";
         std::cout << nava << "\n";
         for (int i = 0; i < lungime + 2; i++) std::cout << "=";
@@ -211,11 +252,19 @@ public:
                         }
                     }
                 }
-                // Prioritate 3: Diamante
                 if (!obiectDesenat) {
                     for (const auto& d : diamante) {
                         if (d.getX() == x && d.getY() == y) {
                             std::cout << d.getSimbol();
+                            obiectDesenat = true;
+                            break;
+                        }
+                    }
+                }
+                if (!obiectDesenat) {
+                    for (const auto& p : powerups) {
+                        if (p.getX() == x && p.getY() == y) {
+                            std::cout << p.getSimbol();
                             obiectDesenat = true;
                             break;
                         }
@@ -292,6 +341,7 @@ public:
 };
 
 
+
 int main() {
     srand(time(0));
     GameMaster gm;
@@ -300,6 +350,7 @@ int main() {
     MotorGrafic motor(30, 10);
     std::vector<Inamic> listaInamici;
     std::vector<Diamant> listaDiamante;
+    std::vector<PowerUp> listaPowerUps;
     Statistici stats;
 
 
@@ -357,6 +408,22 @@ int main() {
                 ++it;
             }
         }
+        for (auto it = listaPowerUps.begin(); it != listaPowerUps.end(); ) {
+            it->miscare();
+            if (it->getX() == albuquerque.x() && it->getY() == albuquerque.y()) {
+                albuquerque.aplicaPowerUp(it->getTip());
+                gm.addEvent("BONUS ACTIVAT: " + it->getTip());
+                it = listaPowerUps.erase(it);
+            } else if (it->getY() >= 10) {
+                it = listaPowerUps.erase(it);
+            } else {
+                ++it;
+            }
+        }
+        if (rand() % 100 < 5) {
+            std::string t = (rand() % 2 == 0) ? "Scut" : "FocRapid";
+            listaPowerUps.push_back(PowerUp(rand() % motor.getL(), 0, t));
+        }
         if (rand() % 100 < gm.getSpawnChance()) {
             int rx = rand() % motor.getL();
             int rTip = rand() % 100;
@@ -373,7 +440,7 @@ int main() {
         }
         gm.update(stats.getScor());
         gm.showStatus();
-        motor.scena(albuquerque, listaInamici, listaDiamante);
+        motor.scena(albuquerque, listaInamici, listaDiamante, listaPowerUps);
         std::cout << "Input (A/D/F/Q): ";
     }
     std::cout << "Inchidere...\n";
