@@ -34,7 +34,6 @@ private:
     int viata;
     int posX, posY;
     char simbol;
-    int puncteRecompensa;
 public:
     Inamic(int v, int x, int y, char s);
 
@@ -48,7 +47,7 @@ public:
     void scadeViata(int dmg);
 };
 Inamic::Inamic(int v, int x, int y, char s)
-    : viata(v), posX(x), posY(y), simbol(s), puncteRecompensa(v * 2) {}
+    : viata(v), posX(x), posY(y), simbol(s) {}
 void Inamic::miscareInamic() {
     this->posY++;
 }
@@ -102,7 +101,6 @@ private:
     Pozitie locatie;
     Arsenal armament;
     char aspect;
-    int scorCurent;
 public:
     explicit NavaJucator(const std::string& nume, int startX, int startY);
     NavaJucator(const NavaJucator& alta);
@@ -139,11 +137,11 @@ public:
 };
 NavaJucator::NavaJucator(const std::string& nume, int startX, int startY)
     : numeNava(nume), integritate(100), locatie(startX, startY),
-      armament("Laser", 40, 10), aspect('N'), scorCurent(0) {}
+      armament("Laser", 40, 10), aspect('N') {}
 
 NavaJucator::NavaJucator(const NavaJucator& alta)
     : numeNava(alta.numeNava + "_Backup"), integritate(alta.integritate),
-      locatie(alta.locatie), armament(alta.armament), aspect(alta.aspect), scorCurent(alta.scorCurent) {}
+      locatie(alta.locatie), armament(alta.armament), aspect(alta.aspect) {}
 
 NavaJucator& NavaJucator::operator=(const NavaJucator& alta) {
     if (this != &alta) {
@@ -152,7 +150,6 @@ NavaJucator& NavaJucator::operator=(const NavaJucator& alta) {
         this->locatie = alta.locatie;
         this->armament = alta.armament;
         this->aspect = alta.aspect;
-        this->scorCurent = alta.scorCurent;
     }
     return *this;
 }
