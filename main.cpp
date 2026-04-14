@@ -36,6 +36,8 @@ private:
     int viata;
     int posX, posY;
     char simbol;
+    int viataMax;
+    bool s_a_transformat;
 public:
     Inamic(int v, int x, int y, char s);
 
@@ -49,12 +51,18 @@ public:
     void scadeViata(int dmg);
 };
 Inamic::Inamic(int v, int x, int y, char s)
-    : viata(v), posX(x), posY(y), simbol(s) {}
+    : viata(v), posX(x), posY(y), simbol(s), viataMax(v), s_a_transformat(false) {}
 void Inamic::miscareInamic() {
     this->posY++;
 }
 void Inamic::scadeViata(int dmg) {
     this->viata = this->viata - dmg;
+    if (!s_a_transformat && viata <= viataMax / 2) {
+        if (simbol == 'W') simbol = 'w';
+        else if (simbol == 'U') simbol = 'u';
+        else if (simbol == 'X') simbol = 'x';
+        s_a_transformat = true;
+    }
 }
 
 class Diamant {
@@ -248,17 +256,52 @@ public:
         std::cout << "******************************\n";
     }
 };
+class GameMaster {
+private:
+    int level;
+    int pragNivel;
+    std::vector<std::string> log;
 
+public:
+    GameMaster() {
+        level = 1;
+        pragNivel = 500;
+    }
+    void update(int scorActual) {
+        if (scorActual >= level * pragNivel) {
+            level++;
+            log.push_back("--- NIVELUL "+ std::to_string(level)+" A INCEPUT ---");
+        }
+    }
+    void addEvent(std::string msg) {
+        if (log.size() > 4) {
+            log.erase(log.begin());
+        }
+        log.push_back(msg);
+    }
+    void showStatus() {
+        std::cout << "\n>>> LEVEL: " << level << "<<<\n";
+        for (const auto& msg : log) {
+            std::cout << "  - " << msg << "\n";
+        }
+    }
+    int getSpawnChance() {
+        int chance = 10 + (level * 3);
+        return (chance > 35) ? 35 : chance;
+    }
+};
 
 
 int main() {
     srand(time(0));
+    GameMaster gm;
     InterfataUtilizator::afiseazaBanner();
     NavaJucator albuquerque("Interceptor", 15, 9);
     MotorGrafic motor(30, 10);
     std::vector<Inamic> listaInamici;
     std::vector<Diamant> listaDiamante;
     Statistici stats;
+
 
     listaInamici.push_back(Inamic(20, 5, 0, 'v'));
     listaInamici.push_back(Inamic(50, 20, 1, 'W'));
@@ -314,13 +357,22 @@ int main() {
                 ++it;
             }
         }
-        if (rand() % 100 < 10) {
-            int xRandom = rand() % motor.getL();
-            listaInamici.push_back(Inamic(20, xRandom, 0, 'v'));
+        if (rand() % 100 < gm.getSpawnChance()) {
+            int rx = rand() % motor.getL();
+            int rTip = rand() % 100;
+
+            if (rTip < 75) {
+                listaInamici.push_back(Inamic(20, rx, 0, 'v'));
+            } else {
+                listaInamici.push_back(Inamic(65, rx, 0, 'W'));
+                gm.addEvent("Atentie: Radarul a detectat un inamic greu la X=" + std::to_string(rx));
+            }
         }
         if (rand() % 100 < 5) {
             listaDiamante.push_back(Diamant(rand() % motor.getL(), 0));
         }
+        gm.update(stats.getScor());
+        gm.showStatus();
         motor.scena(albuquerque, listaInamici, listaDiamante);
         std::cout << "Input (A/D/F/Q): ";
     }
