@@ -49,6 +49,16 @@ public:
     int getViata() const { return viata; }
 
     void scadeViata(int dmg);
+    bool esteValid() const {
+        if (viata < 0 || viata > 1000) return false;
+        if (posX < 0 || posY < 0) return false;
+        return true;
+    }
+
+    void reseteazaStare() {
+        viata = viataMax;
+        s_a_transformat = false;
+    }
 };
 Inamic::Inamic(int v, int x, int y, char s)
     : viata(v), posX(x), posY(y), simbol(s), viataMax(v), s_a_transformat(false) {}
@@ -357,7 +367,18 @@ public:
         return (chance > 35) ? 35 : chance;
     }
 };
-
+class ManagerResurse {
+public:
+    static std::string obtineMesajInfrangere(int scor) {
+        if (scor < 1000) return "Mai incearca! Data viitoare va fi mai bine.";
+        if (scor < 5000) return "O performanta bunaa!";
+        return "Esti o legenda a spatiului!";
+    }
+    static bool verificaCompatibilitate(const std::string& numeNava) {
+        if (numeNava.empty()) return false;
+        return (numeNava.length() > 3);
+    }
+};
 
 
 int main() {
