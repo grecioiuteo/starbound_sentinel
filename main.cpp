@@ -32,6 +32,7 @@ public:
 class Inamic {
 private:
     int viata;
+    int armura;
     int posX, posY;
     char simbol;
     int viataMax;
@@ -54,12 +55,26 @@ public:
     }
 };
 Inamic::Inamic(int v, int x, int y, char s)
-    : viata(v), posX(x), posY(y), simbol(s), viataMax(v), s_a_transformat(false) {}
+    : viata(v), armura(30), posX(x), posY(y), simbol(s), viataMax(v), s_a_transformat(false) {}
 void Inamic::miscareInamic() {
     this->posY++;
 }
 void Inamic::scadeViata(int dmg) {
-    this->viata = this->viata - dmg;
+    if (this->armura > 0) {
+        std::cout << "--- IMPACT IN ARMURA! ---\n";
+        int dmgBlocat = dmg / 2;
+        this->armura -= dmgBlocat;
+
+        if (this->armura < 0) {
+            int rest = -this->armura;
+            this->armura = 0;
+            this->viata -= (dmgBlocat + rest);
+        } else {
+            this->viata -= (dmg - dmgBlocat);
+        }
+    } else {
+        this->viata -= dmg;
+    }
     if (!s_a_transformat && viata <= viataMax / 2) {
         if (simbol == 'W') simbol = 'w';
         else if (simbol == 'U') simbol = 'u';
@@ -158,6 +173,11 @@ private:
     int valoareScut;
     int bonusDamage;
 public:
+    void autoDiagnostic() const {
+        std::cout << "Diagnostic: ";
+        if (integritate > 50) std::cout << "Sisteme Nominale.\n";
+        else std::cout << "Sisteme Avariate - Necesita Reparatii!\n";
+    }
     explicit NavaJucator(const std::string& nume, int startX, int startY);
     NavaJucator(const NavaJucator& alta);
     NavaJucator& operator=(const NavaJucator& alta);
@@ -368,11 +388,30 @@ public:
         return "Esti o legenda a spatiului!";
     }
 };
+class Realizari {
+private:
+    int inamiciDistrusi;
+    bool asulZborului;
+public:
+    Realizari() : inamiciDistrusi(0), asulZborului(false) {}
+
+    void inamicDoborat() {
+        inamiciDistrusi++;
+        if (inamiciDistrusi >= 5) asulZborului = true;
+    }
+
+    friend std::ostream& operator<<(std::ostream& os, const Realizari& r) {
+        os<< "Statistici Pilot: " << r.inamiciDistrusi << " kill-uri | Rank: "
+           << (r.asulZborului ? "ASUL SPATIULUI":"RECRUT");
+        return os;
+    }
+};
 
 
 int main() {
     srand(time(0));
     GameMaster gm;
+    Realizari progres;
     InterfataUtilizator::afiseazaBanner();
     NavaJucator albuquerque("Interceptor", 15, 9);
     MotorGrafic motor(30, 10);
@@ -408,6 +447,7 @@ int main() {
         for (auto it = listaInamici.begin(); it != listaInamici.end(); ) {
             if (it->getViata() <= 0) {
                 stats.adaugaMoarte();
+                progres.inamicDoborat();
                 it = listaInamici.erase(it);
             }
             else if (it->getY() >= 10) {
@@ -494,6 +534,7 @@ int main() {
     if (albuquerque.getAtacTotal() > 20) {
         std::cout << "Nava a terminat cu upgrade-uri de atac active.\n";
     }
+    std::cout << progres << "\n";
 
     backup.getArmament() += 10;
     std::cout << "--- SISTEM BACKUP ACTIVAT ---\n";
@@ -502,5 +543,6 @@ int main() {
         listaInamici[0].reseteazaStare();
     }
     std::cout << "Inchidere...\n";
+    albuquerque.autoDiagnostic();
     return 0;
 }
