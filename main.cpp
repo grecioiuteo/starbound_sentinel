@@ -499,6 +499,7 @@ int main() {
     std::cout << "Nava la finalul misiunii: " << albuquerque << "\n";
     NavaJucator backup = albuquerque;
     int munitieFinala = backup.getArmament().reincarca();
+    std::cout << "Munitie dupa reincarcare: " << munitieFinala << std::endl;
     if (albuquerque.getAtacTotal() > 20) {
         std::cout << "Nava a terminat cu upgrade-uri de atac active.\n";
     }
