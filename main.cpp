@@ -12,18 +12,16 @@ private:
     int x, y;
 public:
     explicit Pozitie(int val_x = 0, int val_y = 0) : x(val_x), y(val_y) {}
-    Pozitie (const Pozitie& alta) : x(alta.x), y(alta.y) {}
-    Pozitie& operator=(const Pozitie& alta) {
-        if (this != &alta) {
-            x = alta.x;
-            y = alta.y;
-        }
-        return *this;
-    }
-    ~Pozitie()=default;
+
     int getX() const { return x; }
     int getY() const { return y; }
-    void setX(int val) { x = val; }
+    void setX(int val) {
+        if (val >= 0 && val < 100) x = val;
+    }
+
+    bool operator==(const Pozitie& alta) const {
+        return (x == alta.x && y == alta.y);
+    }
 
     friend std::ostream& operator<<(std::ostream& os, const Pozitie& p) {
         os << "("<<p.x<<", "<<p.y<<")";
@@ -113,22 +111,20 @@ class Arsenal {
     int capacitateMaxima;
 public:
     explicit Arsenal(const std::string& tip = "Laser", int mun = 40, int pwr = 10) : munitie(mun), putereAtac(pwr), tipArma(tip), capacitateMaxima(40) {}
-    Arsenal(const Arsenal& altul) : munitie(altul.munitie), putereAtac(altul.putereAtac), tipArma(altul.tipArma), capacitateMaxima(altul.capacitateMaxima) {}
-    Arsenal& operator= (const Arsenal& altul ) {
-        if (this !=&altul) {
-            munitie = altul.munitie;
-            putereAtac= altul.putereAtac;
-            tipArma = altul.tipArma;
-            capacitateMaxima = altul.capacitateMaxima;
-        }
+    Arsenal& operator+=(int cantitate) {
+        this->munitie += cantitate;
+        if (this->munitie > capacitateMaxima) this->munitie = capacitateMaxima;
         return *this;
     }
-    ~Arsenal()= default;
 
     bool trage();
-    void reincarca();
     int getDmg() const { return putereAtac; }
     int getMunitie() const { return munitie; }
+
+    friend std::ostream& operator<<(std::ostream& os, const Arsenal& a) {
+        os << "Mun: " << a.munitie << "/" << a.capacitateMaxima << " [" << a.tipArma << "]";
+        return os;
+    }
 
 };
 bool Arsenal::trage() {
@@ -192,7 +188,8 @@ public:
     char getAspect()const {return aspect; }
 
     friend std::ostream& operator<<(std::ostream& os, const NavaJucator& n) {
-        os << "[" << n.numeNava << "] HP: " << n.integritate << "% | SCUT: " << n.valoareScut << " | AMMO: " << n.armament.getMunitie();
+        os << "[" << n.numeNava << "] HP: " << n.integritate << "% | "
+           << n.locatie << " | " << n.armament;
         return os;
     }
     void executaReincarcare() {
@@ -218,6 +215,7 @@ public:
     int getAtacTotal() {
         return armament.getDmg() + bonusDamage;
     }
+    Arsenal& getArmament() { return armament; }
 };
 NavaJucator::NavaJucator(const std::string& nume, int startX, int startY)
     : numeNava(nume), integritate(100), locatie(startX, startY),
@@ -495,16 +493,19 @@ int main() {
         motor.scena(albuquerque, listaInamici, listaDiamante, listaPowerUps,listaProiectile);
         std::cout << "Input (A/D/F/Q): ";
     }
-    (void) albuquerque.getAtacTotal();
+    std::cout << "\n--- RAPORT FINAL ---\n";
+    std::cout << "Nava la finalul misiunii: " << albuquerque << "\n";
     albuquerque.primesteLovitura(0);
-    std::cout << "Inchidere...\n";
-    NavaJucator backup =albuquerque;
-    std::cout << "Backup creat:" <<backup <<"\n";
+    if (albuquerque.getAtacTotal() > 20) {
+        std::cout << "Nava a terminat cu upgrade-uri de atac active.\n";
+    }
+    NavaJucator backup = albuquerque;
+    backup.getArmament() += 10;
+    std::cout << "--- SISTEM BACKUP ACTIVAT ---\n";
+    std::cout << backup << "\n";
     if (!listaInamici.empty()) {
-        (void)listaInamici[0].esteValid();
         listaInamici[0].reseteazaStare();
     }
-    (void)ManagerResurse::obtineMesajInfrangere(stats.getScor());
-    (void)ManagerResurse::verificaCompatibilitate("Interceptor");
+    std::cout << "Inchidere...\n";
     return 0;
 }
