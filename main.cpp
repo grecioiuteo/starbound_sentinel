@@ -47,11 +47,6 @@ public:
     int getViata() const { return viata; }
 
     void scadeViata(int dmg);
-    bool esteValid() const {
-        if (viata < 0 || viata > 1000) return false;
-        if (posX < 0 || posY < 0) return false;
-        return true;
-    }
 
     void reseteazaStare() {
         viata = viataMax;
@@ -120,7 +115,6 @@ public:
     bool trage();
     int reincarca();
     int getDmg() const { return putereAtac; }
-    int getMunitie() const { return munitie; }
 
     friend std::ostream& operator<<(std::ostream& os, const Arsenal& a) {
         os << "Mun: " << a.munitie << "/" << a.capacitateMaxima << " [" << a.tipArma << "]";
@@ -190,8 +184,7 @@ public:
     char getAspect()const {return aspect; }
 
     friend std::ostream& operator<<(std::ostream& os, const NavaJucator& n) {
-        os << "[" << n.numeNava << "] HP: " << n.integritate << "% | "
-           << n.locatie << " | " << n.armament;
+        os << "[" << n.numeNava << "] HP: " << n.integritate << "% | Pozitie: " << n.locatie << " | Armament: " << n.armament;
         return os;
     }
     int executaReincarcare() {
@@ -374,10 +367,6 @@ public:
         if (scor < 5000) return "O performanta bunaa!";
         return "Esti o legenda a spatiului!";
     }
-    static bool verificaCompatibilitate(const std::string& numeNava) {
-        if (numeNava.empty()) return false;
-        return (numeNava.length() > 3);
-    }
 };
 
 
@@ -497,6 +486,8 @@ int main() {
     }
     std::cout << "\n--- RAPORT FINAL ---\n";
     std::cout << "Nava la finalul misiunii: " << albuquerque << "\n";
+    std::string mesajFinal = ManagerResurse::obtineMesajInfrangere(stats.getScor());
+    std::cout << "Comandament: " << mesajFinal << "\n";
     NavaJucator backup = albuquerque;
     int munitieFinala = backup.getArmament().reincarca();
     std::cout << "Munitie dupa reincarcare: " << munitieFinala << std::endl;
