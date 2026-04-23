@@ -118,6 +118,7 @@ public:
     }
 
     bool trage();
+    int reincarca();
     int getDmg() const { return putereAtac; }
     int getMunitie() const { return munitie; }
 
@@ -134,9 +135,10 @@ bool Arsenal::trage() {
     }
     return false;
 }
-void Arsenal::reincarca() {
+int Arsenal::reincarca() {
     this->munitie = this->capacitateMaxima;
     std::cout << "Munitie refacuta!\n";
+    return munitie;
 }
 
 class Proiectil {
@@ -192,8 +194,8 @@ public:
            << n.locatie << " | " << n.armament;
         return os;
     }
-    void executaReincarcare() {
-        armament.reincarca();
+    int executaReincarcare() {
+        return armament.reincarca();
     }
     void aplicaPowerUp(const std::string& tip) {
         if (tip == "Scut") {
@@ -495,11 +497,12 @@ int main() {
     }
     std::cout << "\n--- RAPORT FINAL ---\n";
     std::cout << "Nava la finalul misiunii: " << albuquerque << "\n";
-    albuquerque.primesteLovitura(0);
+    NavaJucator backup = albuquerque;
+    int munitieFinala = backup.getArmament().reincarca();
     if (albuquerque.getAtacTotal() > 20) {
         std::cout << "Nava a terminat cu upgrade-uri de atac active.\n";
     }
-    NavaJucator backup = albuquerque;
+
     backup.getArmament() += 10;
     std::cout << "--- SISTEM BACKUP ACTIVAT ---\n";
     std::cout << backup << "\n";
