@@ -521,10 +521,8 @@ int main() {
 
             if (!pozitieOcupata) {
                 if (rTip < 75) {
-                    // Inamic normal
                     listaInamici.push_back(Inamic(20, rx, 0, 'v'));
                 } else {
-                    // Inamic greu (W)
                     listaInamici.push_back(Inamic(65, rx, 0, 'W'));
                     gm.addEvent("Atentie: Inamic GREU detectat la X=" + std::to_string(rx));
                 }
