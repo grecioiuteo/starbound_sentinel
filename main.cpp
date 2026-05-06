@@ -19,6 +19,7 @@ public:
         if (val >= 0 && val < 100) x = val;
     }
 
+    void setY(int val) { y = val; }
     bool operator==(const Pozitie& alta) const {
         return (x == alta.x && y == alta.y);
     }
@@ -33,7 +34,7 @@ class Inamic {
 private:
     int viata;
     int armura;
-    int posX, posY;
+    Pozitie loc;
     char simbol;
     int viataMax;
     bool s_a_transformat;
@@ -42,8 +43,8 @@ public:
 
     void miscareInamic();
 
-    int getX() const { return posX; }
-    int getY() const { return posY; }
+    int getX() const { return loc.getX(); }
+    int getY() const { return loc.getY(); }
     char getSimbol() const { return simbol; }
     int getViata() const { return viata; }
 
@@ -55,9 +56,9 @@ public:
     }
 };
 Inamic::Inamic(int v, int x, int y, char s)
-    : viata(v), armura(30), posX(x), posY(y), simbol(s), viataMax(v), s_a_transformat(false) {}
+    : viata(v), armura(30),loc(x, y), simbol(s), viataMax(v), s_a_transformat(false) {}
 void Inamic::miscareInamic() {
-    this->posY++;
+    loc.setY(loc.getY() + 1);
 }
 void Inamic::scadeViata(int dmg) {
     if (this->armura > 0) {
@@ -85,31 +86,31 @@ void Inamic::scadeViata(int dmg) {
 
 class Diamant {
 private:
-    int posX, posY;
+    Pozitie loc;
     char simbol;
     int valoare;
 public:
-    Diamant(int x, int y) : posX(x), posY(y), simbol('*'), valoare(500) {}
-    void miscare() { posY++; }
-    int getX()const {return posX; }
-    int getY() const{ return posY; }
+    Diamant(int x, int y) : loc(x, y), simbol('*'), valoare(500) {}
+    void miscare() {loc.setY(loc.getY() + 1); }
+    int getX()const {return loc.getX(); }
+    int getY() const{ return loc.getY(); }
     char getSimbol() const {return simbol;}
     int getValoare() const {return valoare;}
 };
 class PowerUp {
 private:
-    int px, py;
+    Pozitie loc;
     std::string tip;
     char simbol;
 public:
-    PowerUp(int x, int y, const std::string& t) : px(x), py(y), tip(t) {
+    PowerUp(int x, int y, const std::string& t) : loc(x, y), tip(t) {
         if (tip == "Scut") simbol = 'S';
         else if (tip == "FocRapid") simbol = 'R';
         else simbol = 'P';
     }
-    void miscare() { py++; }
-    int getX() const { return px; }
-    int getY() const { return py; }
+    void miscare() {loc.setY(loc.getY() + 1); }
+    int getX() const { return loc.getX(); }
+    int getY() const {return loc.getY(); }
     char getSimbol() const { return simbol; }
     const std::string& getTip() const { return tip; }
 };
@@ -152,13 +153,16 @@ int Arsenal::reincarca() {
 
 class Proiectil {
 private:
-    int px, py;
+    Pozitie loc;
     bool activ;
 public:
-    Proiectil(int x, int y) : px(x), py(y), activ(true) {}
-    void miscare() { py--;if (py < 0) activ = false; }
-    int getX() const {return px; }
-    int getY() const{return py; }
+    Proiectil(int x, int y) : loc(x, y), activ(true) {}
+    void miscare() {
+        loc.setY(loc.getY() - 1);
+        if (loc.getY() < 0) activ = false;
+    }
+    int getX() const {return loc.getX(); }
+    int getY() const{return loc.getY(); }
     bool esteActiv() const { return activ;}
     void dezactiveaza() { activ= false; }
 };
@@ -227,7 +231,7 @@ public:
         }
     }
 
-    int getAtacTotal() {
+    int getAtacTotal() const {
         return armament.getDmg() + bonusDamage;
     }
     Arsenal& getArmament() { return armament; }
@@ -262,7 +266,11 @@ public:
     explicit MotorGrafic(int l = 30, int h = 10) : lungime(l), inaltime(h) {}
 
     void scena(const NavaJucator& nava, const std::vector<Inamic>& inamici, const std::vector<Diamant>& diamante,const std::vector<PowerUp>& powerups, const std::vector<Proiectil>& proiectile) {
-        for(int i = 0; i < 10; ++i) std::cout << "\n";
+#ifdef _WIN32
+        std::system("cls");
+#else
+        std::system("clear");
+#endif
         std::cout << nava << "\n";
         for (int i = 0; i < lungime + 2; i++) std::cout << "=";
         std::cout << "\n";
@@ -422,44 +430,23 @@ int main() {
     Statistici stats;
 
 
-    listaInamici.push_back(Inamic(20, 5, 0, 'v'));
-    listaInamici.push_back(Inamic(50, 20, 1, 'W'));
-    listaInamici.push_back(Inamic(30, 10, 1, 'x'));
-    listaInamici.push_back(Inamic(50, 20, 0, 'W'));
-    listaInamici.push_back(Inamic(20, 15, 2, 'v'));
-    listaInamici.push_back(Inamic(40, 25, 1, 'U'));
+
+
     char tastaApasata = ' ';
 
     while (std::cin >> tastaApasata) {
         if (tastaApasata == 'q' || tastaApasata == 'Q') break;
+        albuquerque.miscare(tastaApasata, motor.getL());
         if (tastaApasata == 'f' || tastaApasata == 'F') {
             int dmg = albuquerque.actiuneAtac();
             if (dmg == 0) {
                 albuquerque.executaReincarcare();
             } else {
                 listaProiectile.push_back(Proiectil(albuquerque.x(), albuquerque.y() - 1));
-                gm.addEvent("FOC: Racheta lansata!");
+
             }
         }
-        for (auto& inamic : listaInamici) {
-            inamic.miscareInamic();
-        }
-        for (auto it = listaInamici.begin(); it != listaInamici.end(); ) {
-            if (it->getViata() <= 0) {
-                stats.adaugaMoarte();
-                progres.inamicDoborat();
-                it = listaInamici.erase(it);
-            }
-            else if (it->getY() >= 10) {
-                albuquerque.primesteLovitura(20);
-                gm.addEvent("AVARIE: Inamicul a trecut de defensiva!");
-                InterfataUtilizator::afiseazaGameOver(stats.getScor());
-                return 0;
-            }
-            else {
-                ++it;
-            }
-        }
+
         for (auto it = listaDiamante.begin(); it != listaDiamante.end(); ) {
             it->miscare();
             if (it->getX() == albuquerque.x() && it->getY() == albuquerque.y()) {
@@ -486,6 +473,7 @@ int main() {
                 ++it;
             }
         }
+
         for (auto& p : listaProiectile) p.miscare();
         for (auto& p : listaProiectile) {
             if (!p.esteActiv()) continue;
@@ -497,27 +485,58 @@ int main() {
                 }
             }
         }
+        for (auto it = listaInamici.begin(); it != listaInamici.end(); ) {
+            if (it->getViata() <= 0) {
+                stats.adaugaMoarte();
+                progres.inamicDoborat();
+                it = listaInamici.erase(it);
+                continue;
+            }
+            it->miscareInamic();
+
+            if (it->getY() >= 10) {
+                albuquerque.primesteLovitura(20);
+                std::cout << "\nGAME OVER! Inamicul a trecut de defensiva!\n";
+                InterfataUtilizator::afiseazaGameOver(stats.getScor());
+                return 0;
+            }
+            ++it;
+        }
+
         for (auto it = listaProiectile.begin(); it != listaProiectile.end(); ) {
             if (!it->esteActiv()) it = listaProiectile.erase(it);
             else ++it;
         }
-        if (rand() % 100 < 5) {
-            std::string t = (rand() % 2 == 0) ? "Scut" : "FocRapid";
-            listaPowerUps.push_back(PowerUp(rand() % motor.getL(), 0, t));
-        }
+
         if (rand() % 100 < gm.getSpawnChance()) {
             int rx = rand() % motor.getL();
             int rTip = rand() % 100;
+            bool pozitieOcupata = false;
+            for (const auto& in : listaInamici) {
+                if (in.getX() == rx && in.getY() == 0) {
+                    pozitieOcupata = true;
+                    break;
+                }
+            }
 
-            if (rTip < 75) {
-                listaInamici.push_back(Inamic(20, rx, 0, 'v'));
-            } else {
-                listaInamici.push_back(Inamic(65, rx, 0, 'W'));
-                gm.addEvent("Atentie: Radarul a detectat un inamic greu la X=" + std::to_string(rx));
+            if (!pozitieOcupata) {
+                if (rTip < 75) {
+                    // Inamic normal
+                    listaInamici.push_back(Inamic(20, rx, 0, 'v'));
+                } else {
+                    // Inamic greu (W)
+                    listaInamici.push_back(Inamic(65, rx, 0, 'W'));
+                    gm.addEvent("Atentie: Inamic GREU detectat la X=" + std::to_string(rx));
+                }
             }
         }
+
         if (rand() % 100 < 5) {
             listaDiamante.push_back(Diamant(rand() % motor.getL(), 0));
+        }
+        if (rand() % 100 < 3) {
+            std::string t = (rand() % 2 == 0) ? "Scut" : "FocRapid";
+            listaPowerUps.push_back(PowerUp(rand() % motor.getL(), 0, t));
         }
         gm.update(stats.getScor());
         gm.showStatus();
