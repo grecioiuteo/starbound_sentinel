@@ -94,7 +94,6 @@ public:
     int getX()const {return loc.getX(); }
     int getY() const{ return loc.getY(); }
     char getSimbol() const {return simbol;}
-    int getValoare() const {return valoare;}
 };
 class PowerUp {
 private:
@@ -111,7 +110,6 @@ public:
     int getX() const { return loc.getX(); }
     int getY() const {return loc.getY(); }
     char getSimbol() const { return simbol; }
-    const std::string& getTip() const { return tip; }
 };
 class Arsenal {
     private:
@@ -163,7 +161,6 @@ public:
     int getX() const {return loc.getX(); }
     int getY() const{return loc.getY(); }
     bool esteActiv() const { return activ;}
-    void dezactiveaza() { activ= false; }
 };
 
 class NavaJucator {
@@ -220,13 +217,6 @@ public:
     }
     int executaReincarcare() {
         return armament.reincarca();
-    }
-    void aplicaPowerUp(const std::string& tip) {
-        if (tip == "Scut") {
-            valoareScut = 50;
-        } else if (tip == "FocRapid") {
-            bonusDamage = 15;
-        }
     }
 
     void primesteLovitura(int dmg) {
@@ -547,6 +537,7 @@ int main() {
         gm.update(stats.getScor());
     }
 finalJoc:
+    InterfataUtilizator::afiseazaGameOver(stats.getScor());
     std::cout << "\n--- RAPORT FINAL ---\n";
     std::cout << "Nava la finalul misiunii: " << albuquerque << "\n";
     std::string mesajFinal = ManagerResurse::obtineMesajInfrangere(stats.getScor());
