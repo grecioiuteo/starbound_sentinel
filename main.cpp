@@ -6,7 +6,6 @@
 #include <cstdlib>
 #include <ctime>
 
-
 class Pozitie {
 private:
     int x, y;
@@ -56,7 +55,7 @@ public:
     }
 };
 Inamic::Inamic(int v, int x, int y, char s)
-    : viata(v), armura(30),loc(x, y), simbol(s), viataMax(v), s_a_transformat(false) {}
+    : viata(v), armura(0), loc(x, y), simbol(s), viataMax(v), s_a_transformat(false) {}
 void Inamic::miscareInamic() {
     loc.setY(loc.getY() + 1);
 }
@@ -177,6 +176,13 @@ private:
     int valoareScut;
     int bonusDamage;
 public:
+    int getVieti() const {
+        if (integritate > 66) return 3;
+        if (integritate > 33) return 2;
+        if (integritate > 0) return 1;
+        return 0;
+    }
+    bool esteOperationala() const { return integritate > 0; }
     void autoDiagnostic() const {
         std::cout << "Diagnostic: ";
         if (integritate > 50) std::cout << "Sisteme Nominale.\n";
@@ -189,9 +195,10 @@ public:
     ~NavaJucator()= default;
     void miscare(char tasta, int limitaX) {
         int nx = locatie.getX();
+        int viteza = 2;
 
-        if ((tasta == 'a' || tasta == 'A') && nx > 0) nx--;
-        if ((tasta == 'd' || tasta == 'D') && nx < limitaX - 1) nx++;
+        if ((tasta == 'a' || tasta == 'A') && nx >= viteza) nx -= viteza;
+        if ((tasta == 'd' || tasta == 'D') && nx <= limitaX - viteza - 1) nx += viteza;
 
         locatie.setX(nx);
     }
@@ -263,87 +270,91 @@ private:
     int lungime, inaltime;
 
 public:
-    explicit MotorGrafic(int l = 30, int h = 10) : lungime(l), inaltime(h) {}
+    explicit MotorGrafic(int l = 60, int h = 20) : lungime(l), inaltime(h) {}
 
-    void scena(const NavaJucator& nava, const std::vector<Inamic>& inamici, const std::vector<Diamant>& diamante,const std::vector<PowerUp>& powerups, const std::vector<Proiectil>& proiectile) {
+    void scena(const NavaJucator& nava, const std::vector<Inamic>& inamici, const std::vector<Diamant>& diamante, const std::vector<PowerUp>& powerups, const std::vector<Proiectil>& proiectile, int scorActual) {
 #ifdef _WIN32
-        std::system("cls");
+    std::system("cls");
 #else
-        std::system("clear");
+    std::system("clear");
 #endif
         std::cout << nava << "\n";
-        for (int i = 0; i < lungime + 2; i++) std::cout << "=";
-        std::cout << "\n";
+        std::cout << ">>> SCOR: " << scorActual << " | VIEȚI BAZĂ: " << nava.getVieti() << " / 3 <<<\n";
 
-        for (int y = 0; y < inaltime; y++) {
-            std::cout << "|";
-            for (int x = 0; x < lungime; x++) {
-                bool obiectDesenat = false;
-                if (x == nava.x() && y == nava.y()) {
-                    std::cout << nava.getAspect();
-                    obiectDesenat = true;
-                }
-                if (!obiectDesenat) {
-                    for (const auto& in : inamici) {
-                        if (in.getX() == x && in.getY() == y) {
-                            std::cout << in.getSimbol();
-                            obiectDesenat = true;
-                            break;
-                        }
-                    }
-                }
-                if (!obiectDesenat) {
-                    for (const auto& d : diamante) {
-                        if (d.getX() == x && d.getY() == y) {
-                            std::cout << d.getSimbol();
-                            obiectDesenat = true;
-                            break;
-                        }
-                    }
-                }
-                if (!obiectDesenat) {
-                    for (const auto& p : powerups) {
-                        if (p.getX() == x && p.getY() == y) {
-                            std::cout << p.getSimbol();
-                            obiectDesenat = true;
-                            break;
-                        }
-                    }
-                }
-                if (!obiectDesenat) {
-                    for (const auto& p : proiectile) {
-                        if (p.getX() == x && p.getY() == y) {
-                            std::cout << "|";
-                            obiectDesenat = true;
-                            break;
-                        }
-                    }
-                }
-                if (!obiectDesenat) std::cout << " ";
+    for (int i = 0; i < (lungime + 2); i++) std::cout << (i % 2 == 0 ? "=" : " ");
+    std::cout << "\n";
+
+    for (int y = 0; y < inaltime; y++) {
+        std::cout << "|";
+        for (int x = 0; x < lungime; x++) {
+            bool obiectDesenat = false;
+            if (x == nava.x() && y == nava.y()) {
+                std::cout << nava.getAspect();
+                obiectDesenat = true;
             }
-            std::cout << "|\n";
+            if (!obiectDesenat) {
+                for (const auto& in : inamici) {
+                    if (in.getX() == x && in.getY() == y) {
+                        std::cout << in.getSimbol();
+                        obiectDesenat = true;
+                        break;
+                    }
+                }
+            }
+            if (!obiectDesenat) {
+                for (const auto& d : diamante) {
+                    if (d.getX() == x && d.getY() == y) {
+                        std::cout << d.getSimbol();
+                        obiectDesenat = true;
+                        break;
+                    }
+                }
+            }
+            if (!obiectDesenat) {
+                for (const auto& p : powerups) {
+                    if (p.getX() == x && p.getY() == y) {
+                        std::cout << p.getSimbol();
+                        obiectDesenat = true;
+                        break;
+                    }
+                }
+            }
+            if (!obiectDesenat) {
+                for (const auto& p : proiectile) {
+                    if (p.getX() == x && p.getY() == y) {
+                        std::cout << "|";
+                        obiectDesenat = true;
+                        break;
+                    }
+                }
+            }
+            if (!obiectDesenat) std::cout << " ";
         }
-        for (int i = 0; i < lungime + 2; i++) std::cout << "=";
-        std::cout << "\nComenzi: A/D (Miscare), F (Atac), Q (Exit)\n";
+        std::cout << "|\n";
     }
-
+    for (int i = 0; i < (lungime + 2); i++) std::cout << (i % 2 == 0 ? "=" : " ");
+    std::cout << "\n";
+    std::cout << "\nLEGENDA: N=Nava, v/W=Inamic, *=Diamant, S/R=PowerUp, |=Glonat\n";
+    std::cout << "Comenzi: A/D (Miscare), F (Atac), Space (Asteapta), Q (Iesire)\n";
+}
     int getL() const { return lungime; }
 };
 
 class Statistici {
 private:
-    int inamiciOmorati;
+    int scor;
 public:
-    Statistici() : inamiciOmorati(0) {}
-    void adaugaMoarte() { inamiciOmorati++; }
-    int getScor() const { return inamiciOmorati * 100; }
+    Statistici() : scor(0) {}
+    void adaugaMoarte() { scor += 100; }
+    void adaugaPuncte(int puncte) { scor += puncte; }
+    int getScor() const { return scor; }
 };
 
 class InterfataUtilizator {
 public:
     static void afiseazaBanner() {
         std::cout << "==============================\n";
-        std::cout << "   SPACE DEFENDER v1.0\n";
+        std::cout << "      STARBOUND SENTINEL      \n";
         std::cout << "==============================\n";
     }
 
@@ -384,8 +395,8 @@ public:
         }
     }
     int getSpawnChance() {
-        int chance = 10 + (level * 3);
-        return (chance > 35) ? 35 : chance;
+        int chance = 8 + (level * 2);
+        return (chance > 25) ? 25 : chance;
     }
 };
 class ManagerResurse {
@@ -421,126 +432,121 @@ int main() {
     GameMaster gm;
     Realizari progres;
     InterfataUtilizator::afiseazaBanner();
-    NavaJucator albuquerque("Interceptor", 15, 9);
-    MotorGrafic motor(30, 10);
+    NavaJucator albuquerque("Interceptor", 30, 19);
+    MotorGrafic motor(60, 20);
     std::vector<Inamic> listaInamici;
     std::vector<Diamant> listaDiamante;
     std::vector<PowerUp> listaPowerUps;
     std::vector<Proiectil> listaProiectile;
     Statistici stats;
 
+    std::cout << "\n>>> INSTRUCTIUNI: Introdu comenzi si apasa ENTER<<<\n";
+    std::cout << "\n>>> ATENTIE: Pe masura ce avansezi in nivele, apar din ce in ce mai multi inamici.<<<\n";
+    std::cout << "\n>>> Prin urmare, nu te speria ca la primul nivel apar inamicii mai greu la inceput<<<\n";
+    std::cout << ">>> (A=Stanga, D=Dreapta, F=Foc, SPACE=Asteapta, Q=Iesire) <<<\n";
+    std::cout << "\nApasa o tasta si ENTER pentru start: ";
+    std::string asteaptaStart;
+    std::getline(std::cin, asteaptaStart);
+    std::string inputComplex;
 
+    while (albuquerque.esteOperationala()) {
+        motor.scena(albuquerque, listaInamici, listaDiamante, listaPowerUps, listaProiectile, stats.getScor());
+        gm.showStatus();
 
+        std::cout << "\nComanda ta (A/D/F/Space/Q): ";
+        std::getline(std::cin, inputComplex);
+        if (inputComplex.empty()) inputComplex = " ";
 
-    char tastaApasata = ' ';
-
-    while (std::cin >> tastaApasata) {
-        if (tastaApasata == 'q' || tastaApasata == 'Q') break;
-        albuquerque.miscare(tastaApasata, motor.getL());
-        if (tastaApasata == 'f' || tastaApasata == 'F') {
-            int dmg = albuquerque.actiuneAtac();
-            if (dmg == 0) {
-                albuquerque.executaReincarcare();
-            } else {
+        char tasta = inputComplex[0];
+        if (tasta == 'q' || tasta == 'Q') goto finalJoc;
+        if (tasta == ' ') {
+            gm.addEvent("Nava stationeaza...");
+        }
+        else if (tasta == 'a' || tasta == 'A' || tasta == 'd' || tasta == 'D') {
+            albuquerque.miscare(tasta, motor.getL());
+        }
+        else if (tasta == 'f' || tasta == 'F') {
+            if (albuquerque.actiuneAtac() > 0) {
                 listaProiectile.push_back(Proiectil(albuquerque.x(), albuquerque.y() - 1));
-
+            } else {
+                albuquerque.executaReincarcare();
             }
+        }
+        for (auto& p : listaProiectile) p.miscare();
+        std::vector<int> coloaneDistruse;
+
+        for (auto itP = listaProiectile.begin(); itP != listaProiectile.end(); ) {
+            bool glontConsumat = false;
+            for (auto itIn = listaInamici.begin(); itIn != listaInamici.end(); ) {
+                if (itP->getX() == itIn->getX() && (itP->getY() == itIn->getY() || itP->getY() == itIn->getY() + 1)) {
+
+                    itIn->scadeViata(albuquerque.getAtacTotal());
+                    glontConsumat = true;
+
+                    if (itIn->getViata() <= 0) {
+                        stats.adaugaMoarte();
+                        progres.inamicDoborat();
+                        gm.addEvent("Target Distrus!");
+                        coloaneDistruse.push_back(itIn->getX());
+                        itIn = listaInamici.erase(itIn);
+                    } else {
+                        gm.addEvent("Hit!");
+                        ++itIn;
+                    }
+                    break;
+                } else ++itIn;
+            }
+
+            if (glontConsumat || !itP->esteActiv()) itP = listaProiectile.erase(itP);
+            else ++itP;
+        }
+
+        for (auto itP = listaProiectile.begin(); itP != listaProiectile.end(); ) {
+            bool peColoanaDistrusa = false;
+            for (int col : coloaneDistruse) {
+                if (itP->getX() == col) {
+                    peColoanaDistrusa = true;
+                    break;
+                }
+            }
+
+            if (peColoanaDistrusa) itP = listaProiectile.erase(itP);
+            else ++itP;
         }
 
         for (auto it = listaDiamante.begin(); it != listaDiamante.end(); ) {
             it->miscare();
             if (it->getX() == albuquerque.x() && it->getY() == albuquerque.y()) {
-                for(int i = 0; i < it->getValoare()/100; ++i) stats.adaugaMoarte();
-                std::cout << "DIAMANT COLECTAT! +500\n";
+                stats.adaugaPuncte(150);
+                gm.addEvent("Diamant colectat! +150");
                 it = listaDiamante.erase(it);
-            }
-            else if (it->getY() >= 10) {
+            } else if (it->getY() >= 20) {
                 it = listaDiamante.erase(it);
-            }
-            else {
-                ++it;
-            }
-        }
-        for (auto it = listaPowerUps.begin(); it != listaPowerUps.end(); ) {
-            it->miscare();
-            if (it->getX() == albuquerque.x() && it->getY() == albuquerque.y()) {
-                albuquerque.aplicaPowerUp(it->getTip());
-                gm.addEvent("BONUS ACTIVAT: " + it->getTip());
-                it = listaPowerUps.erase(it);
-            } else if (it->getY() >= 10) {
-                it = listaPowerUps.erase(it);
             } else {
                 ++it;
             }
         }
 
-        for (auto& p : listaProiectile) p.miscare();
-        for (auto& p : listaProiectile) {
-            if (!p.esteActiv()) continue;
-            for (auto& in : listaInamici) {
-                if (p.getX() == in.getX() && p.getY() == in.getY()) {
-                    in.scadeViata(albuquerque.getAtacTotal());
-                    p.dezactiveaza();
-                    gm.addEvent("Target Hit! Inamic lovit la " + std::to_string(p.getX()));
-                }
-            }
-        }
         for (auto it = listaInamici.begin(); it != listaInamici.end(); ) {
-            if (it->getViata() <= 0) {
-                stats.adaugaMoarte();
-                progres.inamicDoborat();
-                it = listaInamici.erase(it);
-                continue;
-            }
             it->miscareInamic();
-
-            if (it->getY() >= 10) {
-                albuquerque.primesteLovitura(20);
-                std::cout << "\nGAME OVER! Inamicul a trecut de defensiva!\n";
-                InterfataUtilizator::afiseazaGameOver(stats.getScor());
-                return 0;
-            }
-            ++it;
-        }
-
-        for (auto it = listaProiectile.begin(); it != listaProiectile.end(); ) {
-            if (!it->esteActiv()) it = listaProiectile.erase(it);
-            else ++it;
+            if (it->getY() >= 20) {
+                albuquerque.primesteLovitura(34);
+                gm.addEvent("Baza a fost lovita!");
+                it = listaInamici.erase(it);
+            } else { ++it; }
         }
 
         if (rand() % 100 < gm.getSpawnChance()) {
-            int rx = rand() % motor.getL();
-            int rTip = rand() % 100;
-            bool pozitieOcupata = false;
-            for (const auto& in : listaInamici) {
-                if (in.getX() == rx && in.getY() == 0) {
-                    pozitieOcupata = true;
-                    break;
-                }
-            }
-
-            if (!pozitieOcupata) {
-                if (rTip < 75) {
-                    listaInamici.push_back(Inamic(20, rx, 0, 'v'));
-                } else {
-                    listaInamici.push_back(Inamic(65, rx, 0, 'W'));
-                    gm.addEvent("Atentie: Inamic GREU detectat la X=" + std::to_string(rx));
-                }
-            }
+            int spawnX = (rand() % (motor.getL() / 2)) * 2;
+            listaInamici.push_back(Inamic(10, spawnX, 1, 'v'));
         }
-
-        if (rand() % 100 < 5) {
-            listaDiamante.push_back(Diamant(rand() % motor.getL(), 0));
-        }
-        if (rand() % 100 < 3) {
-            std::string t = (rand() % 2 == 0) ? "Scut" : "FocRapid";
-            listaPowerUps.push_back(PowerUp(rand() % motor.getL(), 0, t));
+        if (rand() % 100 < 4) {
+            int diamantX = (rand() % (motor.getL() / 2)) * 2;
+            listaDiamante.push_back(Diamant(diamantX, 0));
         }
         gm.update(stats.getScor());
-        gm.showStatus();
-        motor.scena(albuquerque, listaInamici, listaDiamante, listaPowerUps,listaProiectile);
-        std::cout << "Input (A/D/F/Q): ";
     }
+finalJoc:
     std::cout << "\n--- RAPORT FINAL ---\n";
     std::cout << "Nava la finalul misiunii: " << albuquerque << "\n";
     std::string mesajFinal = ManagerResurse::obtineMesajInfrangere(stats.getScor());
