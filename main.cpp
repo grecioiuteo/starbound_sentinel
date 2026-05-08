@@ -55,30 +55,20 @@ public:
     }
 };
 Inamic::Inamic(int v, int x, int y, char s)
-    : viata(v), armura(0), loc(x, y), simbol(s), viataMax(v), s_a_transformat(false) {}
+    : viata(v), armura(s == 'W' ? 10 : 0), loc(x, y), simbol(s), viataMax(v), s_a_transformat(false) {}
 void Inamic::miscareInamic() {
     loc.setY(loc.getY() + 1);
 }
 void Inamic::scadeViata(int dmg) {
     if (this->armura > 0) {
-        std::cout << "--- IMPACT IN ARMURA! ---\n";
-        int dmgBlocat = dmg / 2;
-        this->armura -= dmgBlocat;
-
-        if (this->armura < 0) {
-            int rest = -this->armura;
-            this->armura = 0;
-            this->viata -= (dmgBlocat + rest);
-        } else {
-            this->viata -= (dmg - dmgBlocat);
-        }
+        this->armura = 0;
+        std::cout << "--- SCUT DISTRUS! ---\n";
     } else {
         this->viata -= dmg;
     }
+
     if (!s_a_transformat && viata <= viataMax / 2) {
-        if (simbol == 'W') simbol = 'w';
-        else if (simbol == 'U') simbol = 'u';
-        else if (simbol == 'X') simbol = 'x';
+        if (simbol == 'W') simbol = 'v';
         s_a_transformat = true;
     }
 }
@@ -99,9 +89,11 @@ private:
     Pozitie loc;
     char simbol;
 public:
-    void miscare() {loc.setY(loc.getY() + 1); }
+
+    PowerUp(int x, int y) : loc(x, y), simbol('P') {}
+    void miscare() { loc.setY(loc.getY() + 1); }
     int getX() const { return loc.getX(); }
-    int getY() const {return loc.getY(); }
+    int getY() const { return loc.getY(); }
     char getSimbol() const { return simbol; }
 };
 class Arsenal {
@@ -203,7 +195,7 @@ public:
     int x()const { return locatie.getX();}
     int y() const { return locatie.getY(); }
     char getAspect()const {return aspect; }
-
+    void activeazaScut(int val) { valoareScut += val; }
     friend std::ostream& operator<<(std::ostream& os, const NavaJucator& n) {
         os << "[" << n.numeNava << "] HP: " << n.integritate << "% | Pozitie: " << n.locatie << " | Armament: " << n.armament;
         return os;
@@ -461,22 +453,19 @@ int main() {
             bool glontConsumat = false;
             for (auto itIn = listaInamici.begin(); itIn != listaInamici.end(); ) {
                 if (itP->getX() == itIn->getX() && (itP->getY() == itIn->getY() || itP->getY() == itIn->getY() + 1)) {
-
                     itIn->scadeViata(albuquerque.getAtacTotal());
                     glontConsumat = true;
 
                     if (itIn->getViata() <= 0) {
                         stats.adaugaMoarte();
                         progres.inamicDoborat();
-                        gm.addEvent("Target Distrus!");
+                        gm.addEvent("Inamic Distrus!");
                         itIn = listaInamici.erase(itIn);
                     } else {
-                        gm.addEvent("Hit!");
+                        gm.addEvent("Armura lovita!");
                         ++itIn;
                     }
                     break;
-                } else {
-                    ++itIn;
                 }
             }
 
@@ -485,12 +474,6 @@ int main() {
             } else {
                 ++itP;
             }
-        }
-
-        for (auto itP = listaProiectile.begin(); itP != listaProiectile.end(); ) {
-            bool peColoanaDistrusa = false;
-            if (peColoanaDistrusa) itP = listaProiectile.erase(itP);
-            else ++itP;
         }
 
         for (auto it = listaDiamante.begin(); it != listaDiamante.end(); ) {
@@ -515,9 +498,28 @@ int main() {
             } else { ++it; }
         }
 
+        for (auto it = listaPowerUps.begin(); it != listaPowerUps.end(); ) {
+            it->miscare();
+            if (it->getX() == albuquerque.x() && it->getY() == albuquerque.y()) {
+                gm.addEvent("KIT REPARATII ACTIVAT! + Scut");
+                stats.adaugaPuncte(50);
+                albuquerque.primesteLovitura(-20);
+                it = listaPowerUps.erase(it);
+            } else if (it->getY() >= 20) {
+                it = listaPowerUps.erase(it);
+            } else {
+                ++it;
+            }
+        }
+
         if (rand() % 100 < gm.getSpawnChance()) {
             int spawnX = (rand() % (motor.getL() / 2)) * 2;
-            listaInamici.push_back(Inamic(10, spawnX, 1, 'v'));
+            char tip = (rand() % 5 == 0) ? 'W' : 'v';
+            listaInamici.push_back(Inamic(10, spawnX, 1, tip));
+        }
+        if (rand() % 100 < 2) {
+            int px = (rand() % (motor.getL() / 2)) * 2;
+            listaPowerUps.push_back(PowerUp(px, 0));
         }
         if (rand() % 100 < 4) {
             int diamantX = (rand() % (motor.getL() / 2)) * 2;
@@ -547,8 +549,7 @@ int main() {
     }
     std::cout << "Inchidere...\n";
     albuquerque.autoDiagnostic();
-    if (!listaInamici.empty()) {
-        listaInamici[0].reseteazaStare();
-    }
+    Inamic test(10, 0, 0, 'v');
+    test.reseteazaStare();
     return 0;
 }
