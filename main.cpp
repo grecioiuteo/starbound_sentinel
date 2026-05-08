@@ -460,12 +460,13 @@ int main() {
                         stats.adaugaMoarte();
                         progres.inamicDoborat();
                         gm.addEvent("Inamic Distrus!");
-                        itIn = listaInamici.erase(itIn);
+                        listaInamici.erase(itIn);
                     } else {
                         gm.addEvent("Armura lovita!");
-                        ++itIn;
                     }
                     break;
+                } else {
+                    ++itIn;
                 }
             }
 
@@ -502,6 +503,7 @@ int main() {
             it->miscare();
             if (it->getX() == albuquerque.x() && it->getY() == albuquerque.y()) {
                 gm.addEvent("KIT REPARATII ACTIVAT! + Scut");
+                albuquerque.activeazaScut(20);
                 stats.adaugaPuncte(50);
                 albuquerque.primesteLovitura(-20);
                 it = listaPowerUps.erase(it);
