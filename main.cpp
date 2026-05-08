@@ -87,9 +87,8 @@ class Diamant {
 private:
     Pozitie loc;
     char simbol;
-    int valoare;
 public:
-    Diamant(int x, int y) : loc(x, y), simbol('*'), valoare(500) {}
+    Diamant(int x, int y) : loc(x, y), simbol('*') {}
     void miscare() {loc.setY(loc.getY() + 1); }
     int getX()const {return loc.getX(); }
     int getY() const{ return loc.getY(); }
@@ -98,14 +97,8 @@ public:
 class PowerUp {
 private:
     Pozitie loc;
-    std::string tip;
     char simbol;
 public:
-    PowerUp(int x, int y, const std::string& t) : loc(x, y), tip(t) {
-        if (tip == "Scut") simbol = 'S';
-        else if (tip == "FocRapid") simbol = 'R';
-        else simbol = 'P';
-    }
     void miscare() {loc.setY(loc.getY() + 1); }
     int getX() const { return loc.getX(); }
     int getY() const {return loc.getY(); }
@@ -448,7 +441,7 @@ int main() {
         if (inputComplex.empty()) inputComplex = " ";
 
         char tasta = inputComplex[0];
-        if (tasta == 'q' || tasta == 'Q') goto finalJoc;
+        if (tasta == 'q' || tasta == 'Q') break;
         if (tasta == ' ') {
             gm.addEvent("Nava stationeaza...");
         }
@@ -463,7 +456,6 @@ int main() {
             }
         }
         for (auto& p : listaProiectile) p.miscare();
-        std::vector<int> coloaneDistruse;
 
         for (auto itP = listaProiectile.begin(); itP != listaProiectile.end(); ) {
             bool glontConsumat = false;
@@ -477,29 +469,26 @@ int main() {
                         stats.adaugaMoarte();
                         progres.inamicDoborat();
                         gm.addEvent("Target Distrus!");
-                        coloaneDistruse.push_back(itIn->getX());
                         itIn = listaInamici.erase(itIn);
                     } else {
                         gm.addEvent("Hit!");
                         ++itIn;
                     }
                     break;
-                } else ++itIn;
+                } else {
+                    ++itIn;
+                }
             }
 
-            if (glontConsumat || !itP->esteActiv()) itP = listaProiectile.erase(itP);
-            else ++itP;
+            if (glontConsumat || !itP->esteActiv()) {
+                itP = listaProiectile.erase(itP);
+            } else {
+                ++itP;
+            }
         }
 
         for (auto itP = listaProiectile.begin(); itP != listaProiectile.end(); ) {
             bool peColoanaDistrusa = false;
-            for (int col : coloaneDistruse) {
-                if (itP->getX() == col) {
-                    peColoanaDistrusa = true;
-                    break;
-                }
-            }
-
             if (peColoanaDistrusa) itP = listaProiectile.erase(itP);
             else ++itP;
         }
@@ -536,7 +525,7 @@ int main() {
         }
         gm.update(stats.getScor());
     }
-finalJoc:
+
     InterfataUtilizator::afiseazaGameOver(stats.getScor());
     std::cout << "\n--- RAPORT FINAL ---\n";
     std::cout << "Nava la finalul misiunii: " << albuquerque << "\n";
@@ -558,5 +547,8 @@ finalJoc:
     }
     std::cout << "Inchidere...\n";
     albuquerque.autoDiagnostic();
+    if (!listaInamici.empty()) {
+        listaInamici[0].reseteazaStare();
+    }
     return 0;
 }
