@@ -38,6 +38,56 @@ void Inamic::scadeViata(int dmg) {
     }
 }
 
+void InamicMeteorit::miscareInamic() {
+    static int tureBlocat = 0;
+    static bool esteInColiziune = false;
+
+    if (this->navaTinta != nullptr) {
+        NavaJucator* navaModificabila = const_cast<NavaJucator*>(this->navaTinta);
+        int xJucator = navaModificabila->x();
+        int xMeteorit = loc.getX();
+
+        if (esteInColiziune) {
+            if (tureBlocat > 0) {
+                tureBlocat--;
+                if (xJucator != xMeteorit) {
+                    if (xJucator > xMeteorit) {
+                        navaModificabila->miscare('A', 30);
+                    } else {
+                        navaModificabila->miscare('D', 30);
+                    }
+                }
+                return;
+            } else {
+                esteInColiziune = false;
+                this->viata = 0;
+                return;
+            }
+        }
+
+        if ((loc.getY() == 18 || loc.getY() == 19) && xMeteorit == xJucator) {
+            esteInColiziune = true;
+            tureBlocat = 5;
+            this->simbol = 'X';
+            return;
+        }
+    }
+
+    loc.setY(loc.getY() + 1);
+
+    if (this->navaTinta != nullptr) {
+        int xJucator = this->navaTinta->x();
+        int xMeteorit = loc.getX();
+
+        if (xMeteorit < xJucator) {
+            loc.setX(xMeteorit + 3);
+        }
+        else if (xMeteorit > xJucator) {
+            loc.setX(xMeteorit - 3);
+        }
+    }
+}
+
 Diamant::Diamant(int x, int y) : loc(x, y), simbol('*') {}
 void Diamant::miscare() { loc.setY(loc.getY() + 1); }
 int Diamant::getX() const { return loc.getX(); }

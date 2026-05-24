@@ -4,7 +4,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
-#include<exception>
+#include <exception>
 
 class GameException : public std::exception {
 protected:
@@ -210,6 +210,18 @@ public:
     void primesteLovitura(int dmg);
     int getAtacTotal() const;
     Arsenal& getArmament();
+};
+
+class InamicMeteorit : public Inamic {
+private:
+    const NavaJucator* navaTinta;
+public:
+    InamicMeteorit(int x, int y, const NavaJucator* nava)
+        : Inamic(80, x, y, 'M'), navaTinta(nava) {}
+
+    void miscareInamic() override;
+
+    Inamic* clone() const override { return new InamicMeteorit(*this); }
 };
 
 class MotorGrafic {

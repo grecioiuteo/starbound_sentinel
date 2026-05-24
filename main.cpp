@@ -235,6 +235,11 @@ int main() {
                 } else {
                     flota.adaugaInamic(new InamicFregata(spawnX, 1));
                 }
+
+                if (flota.getInamici().size() < 6 && (rand() % 100 < 30)) {
+                    int bandaMeteorit = 1 + (rand() % 8);
+                    flota.adaugaInamic(new InamicMeteorit(bandaMeteorit * 3, 1, &albuquerque));
+                }
             }
 
             if (rand() % 100 < 4) {
