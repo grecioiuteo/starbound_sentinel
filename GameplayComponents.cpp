@@ -39,10 +39,10 @@ void Inamic::scadeViata(int dmg) {
 }
 
 void InamicMeteorit::miscareInamic() {
-    static int tureBlocat = 0;
-    static bool esteInColiziune = false;
-
     if (this->navaTinta != nullptr) {
+        static int tureBlocat = 0;
+        static bool esteInColiziune = false;
+
         NavaJucator* navaModificabila = const_cast<NavaJucator*>(this->navaTinta);
         int xJucator = navaModificabila->x();
         int xMeteorit = loc.getX();
