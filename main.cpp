@@ -1,557 +1,276 @@
 #include <iostream>
 #include <string>
-#include <limits>
-#include <ostream>
 #include <vector>
 #include <cstdlib>
 #include <ctime>
 
-class Pozitie {
-private:
-    int x, y;
-public:
-    explicit Pozitie(int val_x = 0, int val_y = 0) : x(val_x), y(val_y) {}
+#include "GameplayComponents.h"
 
-    int getX() const { return x; }
-    int getY() const { return y; }
-    void setX(int val) {
-        if (val >= 0 && val < 100) x = val;
-    }
-
-    void setY(int val) { y = val; }
-    bool operator==(const Pozitie& alta) const {
-        return (x == alta.x && y == alta.y);
-    }
-
-    friend std::ostream& operator<<(std::ostream& os, const Pozitie& p) {
-        os << "("<<p.x<<", "<<p.y<<")";
-        return os;
-    }
-};
-
-class Inamic {
-private:
-    int viata;
-    int armura;
-    Pozitie loc;
-    char simbol;
-    int viataMax;
-    bool s_a_transformat;
-public:
-    Inamic(int v, int x, int y, char s);
-
-    void miscareInamic();
-
-    int getX() const { return loc.getX(); }
-    int getY() const { return loc.getY(); }
-    char getSimbol() const { return simbol; }
-    int getViata() const { return viata; }
-
-    void scadeViata(int dmg);
-
-    void reseteazaStare() {
-        viata = viataMax;
-        s_a_transformat = false;
-    }
-};
-Inamic::Inamic(int v, int x, int y, char s)
-    : viata(v), armura(s == 'W' ? 10 : 0), loc(x, y), simbol(s), viataMax(v), s_a_transformat(false) {}
-void Inamic::miscareInamic() {
-    loc.setY(loc.getY() + 1);
-}
-void Inamic::scadeViata(int dmg) {
-    if (this->armura > 0) {
-        this->armura = 0;
-        std::cout << "--- SCUT DISTRUS! ---\n";
-    } else {
-        this->viata -= dmg;
-    }
-
-    if (!s_a_transformat && viata <= viataMax / 2) {
-        if (simbol == 'W') simbol = 'v';
-        s_a_transformat = true;
-    }
-}
-
-class Diamant {
-private:
-    Pozitie loc;
-    char simbol;
-public:
-    Diamant(int x, int y) : loc(x, y), simbol('*') {}
-    void miscare() {loc.setY(loc.getY() + 1); }
-    int getX()const {return loc.getX(); }
-    int getY() const{ return loc.getY(); }
-    char getSimbol() const {return simbol;}
-};
-class PowerUp {
-private:
-    Pozitie loc;
-    char simbol;
-public:
-
-    PowerUp(int x, int y) : loc(x, y), simbol('P') {}
-    void miscare() { loc.setY(loc.getY() + 1); }
-    int getX() const { return loc.getX(); }
-    int getY() const { return loc.getY(); }
-    char getSimbol() const { return simbol; }
-};
-class Arsenal {
-    private:
-    int munitie;
-    int putereAtac;
-    std::string tipArma;
-    int capacitateMaxima;
-public:
-    explicit Arsenal(const std::string& tip = "Laser", int mun = 40, int pwr = 10) : munitie(mun), putereAtac(pwr), tipArma(tip), capacitateMaxima(40) {}
-    Arsenal& operator+=(int cantitate) {
-        this->munitie += cantitate;
-        if (this->munitie > capacitateMaxima) this->munitie = capacitateMaxima;
-        return *this;
-    }
-
-    bool trage();
-    int reincarca();
-    int getDmg() const { return putereAtac; }
-
-    friend std::ostream& operator<<(std::ostream& os, const Arsenal& a) {
-        os << "Mun: " << a.munitie << "/" << a.capacitateMaxima << " [" << a.tipArma << "]";
-        return os;
-    }
-
-};
-bool Arsenal::trage() {
-    if (munitie > 0) {
-        munitie--;
-        return true;
-    }
-    return false;
-}
-int Arsenal::reincarca() {
-    this->munitie = this->capacitateMaxima;
-    std::cout << "Munitie refacuta!\n";
-    return munitie;
-}
-
-class Proiectil {
-private:
-    Pozitie loc;
-    bool activ;
-public:
-    Proiectil(int x, int y) : loc(x, y), activ(true) {}
-    void miscare() {
-        loc.setY(loc.getY() - 1);
-        if (loc.getY() < 0) activ = false;
-    }
-    int getX() const {return loc.getX(); }
-    int getY() const{return loc.getY(); }
-    bool esteActiv() const { return activ;}
-};
-
-class NavaJucator {
-private:
-    std::string numeNava;
-    int integritate;
-    Pozitie locatie;
-    Arsenal armament;
-    char aspect;
-    int valoareScut;
-    int bonusDamage;
-public:
-    int getVieti() const {
-        if (integritate > 66) return 3;
-        if (integritate > 33) return 2;
-        if (integritate > 0) return 1;
-        return 0;
-    }
-    bool esteOperationala() const { return integritate > 0; }
-    void autoDiagnostic() const {
-        std::cout << "Diagnostic: ";
-        if (integritate > 50) std::cout << "Sisteme Nominale.\n";
-        else std::cout << "Sisteme Avariate - Necesita Reparatii!\n";
-    }
-    explicit NavaJucator(const std::string& nume, int startX, int startY);
-    NavaJucator(const NavaJucator& alta);
-    NavaJucator& operator=(const NavaJucator& alta);
-
-    ~NavaJucator()= default;
-    void miscare(char tasta, int limitaX) {
-        int nx = locatie.getX();
-        int viteza = 2;
-
-        if ((tasta == 'a' || tasta == 'A') && nx >= viteza) nx -= viteza;
-        if ((tasta == 'd' || tasta == 'D') && nx <= limitaX - viteza - 1) nx += viteza;
-
-        locatie.setX(nx);
-    }
-    int actiuneAtac() {
-        if (armament.trage()) {
-            return armament.getDmg() + bonusDamage;
-        } else {
-            std::cout << "Eroare: Munitie insuficienta!\n";
-            return 0;
-        }
-    }
-    int x()const { return locatie.getX();}
-    int y() const { return locatie.getY(); }
-    char getAspect()const {return aspect; }
-    void activeazaScut(int val) { valoareScut += val; }
-    friend std::ostream& operator<<(std::ostream& os, const NavaJucator& n) {
-        os << "[" << n.numeNava << "] HP: " << n.integritate << "% | Pozitie: " << n.locatie << " | Armament: " << n.armament;
-        return os;
-    }
-    int executaReincarcare() {
-        return armament.reincarca();
-    }
-
-    void primesteLovitura(int dmg) {
-        if (valoareScut > 0) {
-            valoareScut -= dmg;
-            if (valoareScut < 0) valoareScut = 0;
-        } else {
-            integritate -= dmg;
-        }
-    }
-
-    int getAtacTotal() const {
-        return armament.getDmg() + bonusDamage;
-    }
-    Arsenal& getArmament() { return armament; }
-};
-NavaJucator::NavaJucator(const std::string& nume, int startX, int startY)
-    : numeNava(nume), integritate(100), locatie(startX, startY),
-      armament("Laser", 40, 10), aspect('N'), valoareScut(0), bonusDamage(0) {}
-
-NavaJucator::NavaJucator(const NavaJucator& alta)
-    : numeNava(alta.numeNava + "_Backup"), integritate(alta.integritate),
-      locatie(alta.locatie), armament(alta.armament), aspect(alta.aspect),
-      valoareScut(alta.valoareScut), bonusDamage(alta.bonusDamage) {}
-
-NavaJucator& NavaJucator::operator=(const NavaJucator& alta) {
-    if (this != &alta) {
-        this->numeNava = alta.numeNava;
-        this->integritate = alta.integritate;
-        this->locatie = alta.locatie;
-        this->armament = alta.armament;
-        this->aspect = alta.aspect;
-        this->valoareScut = alta.valoareScut;
-        this->bonusDamage = alta.bonusDamage;
-    }
-    return *this;
-}
-
-class MotorGrafic {
-private:
-    int lungime, inaltime;
-
-public:
-    explicit MotorGrafic(int l = 60, int h = 20) : lungime(l), inaltime(h) {}
-
-    void scena(const NavaJucator& nava, const std::vector<Inamic>& inamici, const std::vector<Diamant>& diamante, const std::vector<PowerUp>& powerups, const std::vector<Proiectil>& proiectile, int scorActual) {
 #ifdef _WIN32
-    std::system("cls");
-#else
-    std::system("clear");
+#include <windows.h>
 #endif
-        std::cout << nava << "\n";
-        std::cout << ">>> SCOR: " << scorActual << " | VIEȚI BAZĂ: " << nava.getVieti() << " / 3 <<<\n";
-
-    for (int i = 0; i < (lungime + 2); i++) std::cout << (i % 2 == 0 ? "=" : " ");
-    std::cout << "\n";
-
-    for (int y = 0; y < inaltime; y++) {
-        std::cout << "|";
-        for (int x = 0; x < lungime; x++) {
-            bool obiectDesenat = false;
-            if (x == nava.x() && y == nava.y()) {
-                std::cout << nava.getAspect();
-                obiectDesenat = true;
-            }
-            if (!obiectDesenat) {
-                for (const auto& in : inamici) {
-                    if (in.getX() == x && in.getY() == y) {
-                        std::cout << in.getSimbol();
-                        obiectDesenat = true;
-                        break;
-                    }
-                }
-            }
-            if (!obiectDesenat) {
-                for (const auto& d : diamante) {
-                    if (d.getX() == x && d.getY() == y) {
-                        std::cout << d.getSimbol();
-                        obiectDesenat = true;
-                        break;
-                    }
-                }
-            }
-            if (!obiectDesenat) {
-                for (const auto& p : powerups) {
-                    if (p.getX() == x && p.getY() == y) {
-                        std::cout << p.getSimbol();
-                        obiectDesenat = true;
-                        break;
-                    }
-                }
-            }
-            if (!obiectDesenat) {
-                for (const auto& p : proiectile) {
-                    if (p.getX() == x && p.getY() == y) {
-                        std::cout << "|";
-                        obiectDesenat = true;
-                        break;
-                    }
-                }
-            }
-            if (!obiectDesenat) std::cout << " ";
-        }
-        std::cout << "|\n";
-    }
-    for (int i = 0; i < (lungime + 2); i++) std::cout << (i % 2 == 0 ? "=" : " ");
-    std::cout << "\n";
-    std::cout << "\nLEGENDA: N=Nava, v/W=Inamic, *=Diamant, S/R=PowerUp, |=Glonat\n";
-    std::cout << "Comenzi: A/D (Miscare), F (Atac), Space (Asteapta), Q (Iesire)\n";
-}
-    int getL() const { return lungime; }
-};
-
-class Statistici {
-private:
-    int scor;
-public:
-    Statistici() : scor(0) {}
-    void adaugaMoarte() { scor += 100; }
-    void adaugaPuncte(int puncte) { scor += puncte; }
-    int getScor() const { return scor; }
-};
-
-class InterfataUtilizator {
-public:
-    static void afiseazaBanner() {
-        std::cout << "==============================\n";
-        std::cout << "      STARBOUND SENTINEL      \n";
-        std::cout << "==============================\n";
-    }
-
-    static void afiseazaGameOver(int scor) {
-        std::cout << "\n******************************\n";
-        std::cout << "          GAME OVER          \n";
-        std::cout << "      Scor Final: " << scor << "\n";
-        std::cout << "******************************\n";
-    }
-};
-class GameMaster {
-private:
-    int level;
-    int pragNivel;
-    std::vector<std::string> log;
-
-public:
-    GameMaster() {
-        level = 1;
-        pragNivel = 500;
-    }
-    void update(int scorActual) {
-        if (scorActual >= level * pragNivel) {
-            level++;
-            log.push_back("--- NIVELUL "+ std::to_string(level)+" A INCEPUT ---");
-        }
-    }
-    void addEvent(const std::string& msg) {
-        if (log.size() > 4) {
-            log.erase(log.begin());
-        }
-        log.push_back(msg);
-    }
-    void showStatus() {
-        std::cout << "\n>>> LEVEL: " << level << "<<<\n";
-        for (const auto& msg : log) {
-            std::cout << "  - " << msg << "\n";
-        }
-    }
-    int getSpawnChance() {
-        int chance = 8 + (level * 2);
-        return (chance > 25) ? 25 : chance;
-    }
-};
-class ManagerResurse {
-public:
-    static std::string obtineMesajInfrangere(int scor) {
-        if (scor < 1000) return "Mai incearca! Data viitoare va fi mai bine.";
-        if (scor < 5000) return "O performanta bunaa!";
-        return "Esti o legenda a spatiului!";
-    }
-};
-class Realizari {
-private:
-    int inamiciDistrusi;
-    bool asulZborului;
-public:
-    Realizari() : inamiciDistrusi(0), asulZborului(false) {}
-
-    void inamicDoborat() {
-        inamiciDistrusi++;
-        if (inamiciDistrusi >= 5) asulZborului = true;
-    }
-
-    friend std::ostream& operator<<(std::ostream& os, const Realizari& r) {
-        os<< "Statistici Pilot: " << r.inamiciDistrusi << " kill-uri | Rank: "
-           << (r.asulZborului ? "ASUL SPATIULUI":"RECRUT");
-        return os;
-    }
-};
-
 
 int main() {
-    srand(time(0));
+    srand(static_cast<unsigned int>(time(0)));
     GameMaster gm;
+
+#ifdef _WIN32
+    system("chcp 65001 > nul");
+    HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+    if (hOut != INVALID_HANDLE_VALUE) {
+        DWORD dwMode = 0;
+        if (GetConsoleMode(hOut, &dwMode)) {
+            dwMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+            SetConsoleMode(hOut, dwMode);
+        }
+    }
+#endif
+
     Realizari progres;
     InterfataUtilizator::afiseazaBanner();
-    NavaJucator albuquerque("Interceptor", 30, 19);
-    MotorGrafic motor(60, 20);
-    std::vector<Inamic> listaInamici;
+
+    NavaJucator albuquerque("Interceptor", 15, 19);
+    MotorGrafic motor(30, 20);
+
+    FlotaManager flota;
     std::vector<Diamant> listaDiamante;
     std::vector<PowerUp> listaPowerUps;
     std::vector<Proiectil> listaProiectile;
     Statistici stats;
 
-    std::cout << "\n>>> INSTRUCTIUNI: Introdu comenzi si apasa ENTER<<<\n";
-    std::cout << "\n>>> ATENTIE: Pe masura ce avansezi in nivele, apar din ce in ce mai multi inamici.<<<\n";
-    std::cout << "\n>>> Prin urmare, nu te speria ca la primul nivel apar inamicii mai greu la inceput<<<\n";
-    std::cout << ">>> (A=Stanga, D=Dreapta, F=Foc, SPACE=Asteapta, Q=Iesire) <<<\n";
-    std::cout << "\nApasa o tasta si ENTER pentru start: ";
+    std::cout << "\n>>> CONTROL: A = Stanga | D = Dreapta | F = Foc | SPACE = Pas <<<" << std::endl;
+    std::cout << "\nApasa ENTER pentru a incepe jocul... ";
     std::string asteaptaStart;
     std::getline(std::cin, asteaptaStart);
     std::string inputComplex;
 
     while (albuquerque.esteOperationala()) {
-        motor.scena(albuquerque, listaInamici, listaDiamante, listaPowerUps, listaProiectile, stats.getScor());
-        gm.showStatus();
-
-        std::cout << "\nComanda ta (A/D/F/Space/Q): ";
-        std::getline(std::cin, inputComplex);
-        if (inputComplex.empty()) inputComplex = " ";
-
-        char tasta = inputComplex[0];
-        if (tasta == 'q' || tasta == 'Q') break;
-        if (tasta == ' ') {
-            gm.addEvent("Nava stationeaza...");
-        }
-        else if (tasta == 'a' || tasta == 'A' || tasta == 'd' || tasta == 'D') {
-            albuquerque.miscare(tasta, motor.getL());
-        }
-        else if (tasta == 'f' || tasta == 'F') {
-            if (albuquerque.actiuneAtac() > 0) {
-                listaProiectile.push_back(Proiectil(albuquerque.x(), albuquerque.y() - 1));
-            } else {
-                albuquerque.executaReincarcare();
+        try {
+            for (auto itP = listaProiectile.begin(); itP != listaProiectile.end(); ) {
+                if (itP->getY() == -1) {
+                    itP = listaProiectile.erase(itP);
+                } else {
+                    ++itP;
+                }
             }
-        }
-        for (auto& p : listaProiectile) p.miscare();
 
-        for (auto itP = listaProiectile.begin(); itP != listaProiectile.end(); ) {
-            bool glontConsumat = false;
-            for (auto itIn = listaInamici.begin(); itIn != listaInamici.end(); ) {
-                if (itP->getX() == itIn->getX() && (itP->getY() == itIn->getY() || itP->getY() == itIn->getY() + 1)) {
-                    itIn->scadeViata(albuquerque.getAtacTotal());
-                    glontConsumat = true;
+            motor.scena(albuquerque, flota.getInamici(), listaDiamante, listaPowerUps, listaProiectile, stats.getScor());
+            gm.showStatus();
 
-                    if (itIn->getViata() <= 0) {
-                        stats.adaugaMoarte();
-                        progres.inamicDoborat();
-                        gm.addEvent("Inamic Distrus!");
-                        listaInamici.erase(itIn);
-                    } else {
-                        gm.addEvent("Armura lovita!");
+            std::cout << "\nCe faci? (A/D/F/Space/Q): ";
+            std::getline(std::cin, inputComplex);
+            if (inputComplex.empty()) inputComplex = " ";
+
+            char tasta = inputComplex[0];
+            if (tasta == 'q' || tasta == 'Q') break;
+
+            bool esteNavaUpgrade = (stats.getScor() >= 1500);
+
+            if (tasta == ' ') {
+                gm.addEvent("Ai stat pe loc o tura.");
+            }
+            else if (tasta == 'a' || tasta == 'A' || tasta == 'd' || tasta == 'D') {
+                albuquerque.miscare(tasta, motor.getL());
+            }
+            else if (tasta == 'f' || tasta == 'F') {
+                if (albuquerque.actiuneAtac() > 0) {
+                    bool lovituraInstanta = false;
+
+                    for (size_t i = 0; i < flota.getInamici().size(); ++i) {
+                        Inamic* inamic = flota.getInamici()[i];
+                        bool peAxaNormala = (inamic->getX() == albuquerque.x());
+                        bool peAxaUpgrade = (esteNavaUpgrade && (inamic->getX() == albuquerque.x() + 2));
+
+                        if ((peAxaNormala || peAxaUpgrade) && (inamic->getY() == 18 || inamic->getY() == 19)) {
+                            inamic->scadeViata(albuquerque.getAtacTotal());
+                            gm.addEvent("Atac devastator de aproape!");
+                            lovituraInstanta = true;
+                            break;
+                        }
                     }
-                    break;
+
+                    if (!lovituraInstanta) {
+                        if (esteNavaUpgrade) {
+                            listaProiectile.push_back(Proiectil(albuquerque.x(), albuquerque.y()));
+                            listaProiectile.push_back(Proiectil(albuquerque.x() + 2, albuquerque.y()));
+                            gm.addEvent("Sistemul N-N activat! AMBELE NAVE TRAG SIMULTAN! 🔥");
+                        } else {
+                            listaProiectile.push_back(Proiectil(albuquerque.x(), albuquerque.y()));
+                        }
+                    }
+                }
+            }
+
+            std::vector<int> vechiulYProiectile;
+            for (size_t i = 0; i < listaProiectile.size(); ++i) {
+                vechiulYProiectile.push_back(listaProiectile[i].getY());
+                listaProiectile[i].miscare();
+            }
+
+            std::vector<Inamic*> lovitiAcum;
+
+            for (size_t i = 0; i < listaProiectile.size(); ++i) {
+                if (listaProiectile[i].getY() <= 0) {
+                    listaProiectile[i] = Proiectil(listaProiectile[i].getX(), -1);
+                    continue;
+                }
+
+                if (listaProiectile[i].getY() == -1) continue;
+
+                for (size_t k = 0; k < flota.getInamici().size(); ++k) {
+                    Inamic* inamic = flota.getInamici()[k];
+                    if (inamic->getViata() <= 0) continue;
+
+                    if (listaProiectile[i].getX() == inamic->getX()) {
+                        char simbolCurent = inamic->getSimbol();
+                        bool seLovescul = false;
+
+                        if (simbolCurent == 'v') {
+                            int yAnteriorLaser = vechiulYProiectile[i];
+                            int yCurentInamic = inamic->getY();
+                            int yAnteriorInamic = yCurentInamic - 2;
+
+                            if ((listaProiectile[i].getY() == yCurentInamic) ||
+                                (yAnteriorLaser >= yAnteriorInamic && listaProiectile[i].getY() <= yCurentInamic)) {
+                                seLovescul = true;
+                            }
+                        } else if (simbolCurent == 'W') {
+                            if (listaProiectile[i].getY() == inamic->getY() || listaProiectile[i].getY() == inamic->getY() + 1) {
+                                seLovescul = true;
+                            }
+                        } else {
+                            if (listaProiectile[i].getY() >= inamic->getY() && listaProiectile[i].getY() <= inamic->getY() + 2) {
+                                seLovescul = true;
+                            }
+                        }
+
+                        if (seLovescul) {
+                            inamic->scadeViata(albuquerque.getAtacTotal());
+                            lovitiAcum.push_back(inamic);
+
+                            InamicFregata* testFregata = dynamic_cast<InamicFregata*>(inamic);
+                            if (testFregata != nullptr) {
+                                gm.addEvent("IMPACT FREGATA! Sistemele electronice ale fregatei au fost blocate.");
+                            }
+
+                            if (simbolCurent == 'W' && inamic->getSimbol() == 'v') {
+                                gm.addEvent("Scutul Cruiser-ului a picat! S-a transformat in v.");
+                            } else if (inamic->getViata() <= 0) {
+                                gm.addEvent("Inamic spulberat!");
+                            } else {
+                                gm.addEvent("Inamic avariat!");
+                            }
+
+                            listaProiectile[i] = Proiectil(listaProiectile[i].getX(), -1);
+                            break;
+                        }
+                    }
+                }
+            }
+
+            for (auto itIn = flota.getInamici().begin(); itIn != flota.getInamici().end(); ) {
+                if ((*itIn)->getViata() <= 0) {
+                    stats.adaugaMoarte();
+                    progres.inamicDoborat();
+                    delete *itIn;
+                    itIn = flota.getInamici().erase(itIn);
                 } else {
                     ++itIn;
                 }
             }
 
-            if (glontConsumat || !itP->esteActiv()) {
-                itP = listaProiectile.erase(itP);
-            } else {
-                ++itP;
+            for (auto it = listaDiamante.begin(); it != listaDiamante.end(); ) {
+                it->miscare();
+                if (it->getX() == albuquerque.x() && it->getY() == albuquerque.y()) {
+                    stats.adaugaPuncte(150);
+                    gm.addEvent("Diamant colectat! +150 puncte.");
+                    it = listaDiamante.erase(it);
+                } else if (it->getY() >= 20) {
+                    it = listaDiamante.erase(it);
+                } else {
+                    ++it;
+                }
             }
-        }
 
-        for (auto it = listaDiamante.begin(); it != listaDiamante.end(); ) {
-            it->miscare();
-            if (it->getX() == albuquerque.x() && it->getY() == albuquerque.y()) {
-                stats.adaugaPuncte(150);
-                gm.addEvent("Diamant colectat! +150");
-                it = listaDiamante.erase(it);
-            } else if (it->getY() >= 20) {
-                it = listaDiamante.erase(it);
-            } else {
-                ++it;
+            for (auto it = flota.getInamici().begin(); it != flota.getInamici().end(); ) {
+                (*it)->miscareInamic();
+
+                if ((*it)->getY() >= 20) {
+                    albuquerque.primesteLovitura(34);
+                    gm.addEvent("Atentie! Un inamic a trecut de defensiva si a lovit baza!");
+                    delete *it;
+                    it = flota.getInamici().erase(it);
+                } else {
+                    ++it;
+                }
             }
-        }
 
-        for (auto it = listaInamici.begin(); it != listaInamici.end(); ) {
-            it->miscareInamic();
-            if (it->getY() >= 20) {
-                albuquerque.primesteLovitura(34);
-                gm.addEvent("Baza a fost lovita!");
-                it = listaInamici.erase(it);
-            } else { ++it; }
-        }
-
-        for (auto it = listaPowerUps.begin(); it != listaPowerUps.end(); ) {
-            it->miscare();
-            if (it->getX() == albuquerque.x() && it->getY() == albuquerque.y()) {
-                gm.addEvent("KIT REPARATII ACTIVAT! + Scut");
-                albuquerque.activeazaScut(20);
-                stats.adaugaPuncte(50);
-                albuquerque.primesteLovitura(-20);
-                it = listaPowerUps.erase(it);
-            } else if (it->getY() >= 20) {
-                it = listaPowerUps.erase(it);
-            } else {
-                ++it;
+            for (auto it = listaPowerUps.begin(); it != listaPowerUps.end(); ) {
+                it->miscare();
+                if (it->getX() == albuquerque.x() && it->getY() == albuquerque.y()) {
+                    if (albuquerque.getIntegritate() < 100) {
+                        albuquerque.setIntegritate(albuquerque.getIntegritate() + 20);
+                        gm.addEvent("Kit de reparatii activat! Integritate structurala refacuta.");
+                    } else {
+                        gm.addEvent("Nava este deja la capacitate maxima. Kitul a fost irosit.");
+                    }
+                    stats.adaugaPuncte(50);
+                    it = listaPowerUps.erase(it);
+                } else if (it->getY() >= 20) {
+                    it = listaPowerUps.erase(it);
+                } else {
+                    ++it;
+                }
             }
-        }
 
-        if (rand() % 100 < gm.getSpawnChance()) {
-            int spawnX = (rand() % (motor.getL() / 2)) * 2;
-            char tip = (rand() % 5 == 0) ? 'W' : 'v';
-            listaInamici.push_back(Inamic(10, spawnX, 1, tip));
+            if (flota.getInamici().size() < 6 && (rand() % 100 < gm.getSpawnChance())) {
+                int banda = 1 + (rand() % 8);
+                int spawnX = banda * 3;
+                int tipRandom = rand() % 3;
+
+                if (tipRandom == 0) {
+                    flota.adaugaInamic(new InamicScout(spawnX, 1));
+                } else if (tipRandom == 1) {
+                    flota.adaugaInamic(new InamicCruiser(spawnX, 1));
+                } else {
+                    flota.adaugaInamic(new InamicFregata(spawnX, 1));
+                }
+            }
+
+            if (rand() % 100 < 4) {
+                int px = (1 + (rand() % 8)) * 3;
+                listaPowerUps.push_back(PowerUp(px, 0));
+            }
+            if (rand() % 150 < 3) {
+                int diamantX = (1 + (rand() % 8)) * 3;
+                listaDiamante.push_back(Diamant(diamantX, 0));
+            }
+
+            if (stats.getScor() >= gm.getSpawnChance() * 30) {
+                gm.update(stats.getScor());
+            }
+
         }
-        if (rand() % 100 < 2) {
-            int px = (rand() % (motor.getL() / 2)) * 2;
-            listaPowerUps.push_back(PowerUp(px, 0));
+        catch (const MunitieInsuficientaException& e) {
+            gm.addEvent(e.what() + std::string(" Se executa reincarcarea automata..."));
+            albuquerque.executaReincarcare();a
+
         }
-        if (rand() % 100 < 4) {
-            int diamantX = (rand() % (motor.getL() / 2)) * 2;
-            listaDiamante.push_back(Diamant(diamantX, 0));
+        catch (const PozitieInvalidaException& e) {
+            gm.addEvent(e.what());
         }
-        gm.update(stats.getScor());
+        catch (const NavaDistrusaException& e) {
+            std::cout << "\n[CRITICAL] " << e.what() << "\n";
+            break;
+        }
+        catch (const GameException& e) {
+            std::cout << "\n[EXCEPTIE JOC] " << e.what() << "\n";
+            break;
+        }
     }
 
     InterfataUtilizator::afiseazaGameOver(stats.getScor());
-    std::cout << "\n--- RAPORT FINAL ---\n";
-    std::cout << "Nava la finalul misiunii: " << albuquerque << "\n";
-    std::string mesajFinal = ManagerResurse::obtineMesajInfrangere(stats.getScor());
-    std::cout << "Comandament: " << mesajFinal << "\n";
-    NavaJucator backup = albuquerque;
-    int munitieFinala = backup.getArmament().reincarca();
-    std::cout << "Munitie dupa reincarcare: " << munitieFinala << std::endl;
-    if (albuquerque.getAtacTotal() > 20) {
-        std::cout << "Nava a terminat cu upgrade-uri de atac active.\n";
-    }
-    std::cout << progres << "\n";
-
-    backup.getArmament() += 10;
-    std::cout << "--- SISTEM BACKUP ACTIVAT ---\n";
-    std::cout << backup << "\n";
-    if (!listaInamici.empty()) {
-        listaInamici[0].reseteazaStare();
-    }
-    std::cout << "Inchidere...\n";
-    albuquerque.autoDiagnostic();
-    Inamic test(10, 0, 0, 'v');
-    test.reseteazaStare();
+    std::cout << "\n--- STATISTICI FINALE MISIUNE ---\n";
+    std::cout << "Raport nava jucator: " << albuquerque << "\n";
     return 0;
 }
