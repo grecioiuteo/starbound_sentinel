@@ -82,7 +82,6 @@ void Proiectil::miscare() {
 }
 int Proiectil::getX() const { return loc.getX(); }
 int Proiectil::getY() const { return loc.getY(); }
-bool Proiectil::esteActiv() const { return activ; }
 
 NavaJucator::NavaJucator(const std::string& nume, int startX, int startY)
     : numeNava(nume), integritate(100), locatie(startX, startY),
@@ -110,11 +109,6 @@ int NavaJucator::getVieti() const {
     return 0;
 }
 bool NavaJucator::esteOperationala() const { return integritate > 0; }
-void NavaJucator::autoDiagnostic() const {
-    std::cout << "Diagnostic: ";
-    if (integritate > 50) std::cout << "Sisteme Nominale.\n";
-    else std::cout << "Sisteme Avariate - Necesita Reparatii!\n";
-}
 void NavaJucator::miscare(char tasta, int limitaX) {
     int nx = locatie.getX();
     int viteza = 3;
@@ -132,7 +126,6 @@ int NavaJucator::actiuneAtac() {
 int NavaJucator::x() const { return locatie.getX(); }
 int NavaJucator::y() const { return locatie.getY(); }
 char NavaJucator::getAspect() const { return aspect; }
-void NavaJucator::activeazaScut(int val) { valoareScut += val; }
 int NavaJucator::executaReincarcare() { return armament.reincarca(); }
 void NavaJucator::primesteLovitura(int dmg) {
     if (valoareScut > 0 && dmg > 0) {
@@ -147,7 +140,6 @@ void NavaJucator::primesteLovitura(int dmg) {
     }
 }
 int NavaJucator::getAtacTotal() const { return armament.getDmg() + bonusDamage; }
-Arsenal& NavaJucator::getArmament() { return armament; }
 std::ostream& operator<<(std::ostream& os, const NavaJucator& n) {
     os << "[" << n.numeNava << "] HP: " << n.integritate << "% | Pozitie: " << n.locatie << " | Armament: " << n.armament;
     return os;
@@ -165,7 +157,6 @@ void MotorGrafic::scena(const NavaJucator& nava, const std::vector<Inamic*>& ina
     const std::string RED     = "\033[31m";
     const std::string GREEN   = "\033[32m";
     const std::string YELLOW  = "\033[33m";
-    const std::string BLUE    = "\033[34m";
     const std::string CYAN    = "\033[36m";
     const std::string MAGENTA = "\033[35m";
     const std::string BOLD    = "\033[1m";
@@ -292,12 +283,6 @@ int GameMaster::getSpawnChance() {
     return (chance > 25) ? 25 : chance;
 }
 
-std::string ManagerResurse::obtineMesajInfrangere(int scor) {
-    if (scor < 1000) return "Mai incearca! Data viitoare va fi mai bine.";
-    if (scor < 5000) return "O performanta bunaa!";
-    return "Esti o legenda a spatiului!";
-}
-
 Realizari::Realizari() : inamiciDistrusi(0), asulZborului(false) {}
 void Realizari::inamicDoborat() {
     inamiciDistrusi++;
@@ -336,14 +321,4 @@ void FlotaManager::curataFlota() {
         delete inamic;
     }
     naveFlota.clear();
-}
-
-void FlotaManager::activeazaScuturiCruisere() {
-    for (Inamic* inamic : naveFlota) {
-        InamicCruiser* cruiser = dynamic_cast<InamicCruiser*>(inamic);
-        if (cruiser != nullptr) {
-            cruiser->reseteazaStare();
-            std::cout << "[FLOTA] Scuturile Cruiserelor de lupta au fost reincarcate!\n";
-        }
-    }
 }
