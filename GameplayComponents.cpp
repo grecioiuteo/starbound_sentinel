@@ -37,10 +37,6 @@ void Inamic::scadeViata(int dmg) {
         }
     }
 }
-void Inamic::reseteazaStare() {
-    viata = viataMax;
-    s_a_transformat = false;
-}
 
 Diamant::Diamant(int x, int y) : loc(x, y), simbol('*') {}
 void Diamant::miscare() { loc.setY(loc.getY() + 1); }
@@ -182,7 +178,7 @@ void MotorGrafic::scena(const NavaJucator& nava, const std::vector<Inamic*>& ina
             }
 
             if (!obiectDesenat) {
-                for (const auto& in : inamici) {
+                for (const Inamic* const & in : inamici) {
                     if (in->getX() == x && in->getY() == y) {
                         if (in->getSimbol() == 'W') {
                             std::cout << BOLD << RED << "W" << RESET;
@@ -298,7 +294,7 @@ FlotaManager::~FlotaManager() {
 }
 
 FlotaManager::FlotaManager(const FlotaManager& alta) {
-    for (Inamic* inamic : alta.naveFlota) {
+    for (const Inamic* inamic : alta.naveFlota) {
         this->naveFlota.push_back(inamic->clone());
     }
 }

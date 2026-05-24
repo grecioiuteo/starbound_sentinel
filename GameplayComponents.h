@@ -66,7 +66,6 @@ public:
     int getViata() const { return viata; }
 
     void scadeViata(int dmg);
-    void reseteazaStare();
 
     void afiseaza(std::ostream& os) const {
         afisareVirtuala(os);

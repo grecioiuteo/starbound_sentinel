@@ -148,7 +148,7 @@ int main() {
                             inamic->scadeViata(albuquerque.getAtacTotal());
                             lovitiAcum.push_back(inamic);
 
-                            InamicFregata* testFregata = dynamic_cast<InamicFregata*>(inamic);
+                            const InamicFregata* const testFregata = dynamic_cast<const InamicFregata*>(inamic);
                             if (testFregata != nullptr) {
                                 gm.addEvent("IMPACT FREGATA! Sistemele electronice ale fregatei au fost blocate.");
                             }
