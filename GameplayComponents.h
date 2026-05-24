@@ -95,10 +95,8 @@ public:
 };
 
 class InamicCruiser : public Inamic {
-private:
-    int contorMiscare;
 public:
-    InamicCruiser(int x, int y) : Inamic(20, x, y, 'W'), contorMiscare(0) {
+    InamicCruiser(int x, int y) : Inamic(20, x, y, 'W') {
         armura = 10;
     }
 
