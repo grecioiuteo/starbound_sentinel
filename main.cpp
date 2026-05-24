@@ -253,7 +253,7 @@ int main() {
         }
         catch (const MunitieInsuficientaException& e) {
             gm.addEvent(e.what() + std::string(" Se executa reincarcarea automata..."));
-            albuquerque.executaReincarcare();a
+            albuquerque.executaReincarcare();
 
         }
         catch (const PozitieInvalidaException& e) {

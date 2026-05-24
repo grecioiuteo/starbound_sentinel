@@ -4,15 +4,16 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include<exception>
 
-class GameException {
+class GameException : public std::exception {
 protected:
     std::string mesajEroare;
 public:
     explicit GameException(const std::string& mesaj) : mesajEroare(mesaj) {}
     virtual ~GameException() = default;
 
-    virtual const char* what() const { return mesajEroare.c_str(); }
+    virtual const char* what() const noexcept override { return mesajEroare.c_str(); }
 };
 
 class MunitieInsuficientaException : public GameException {
