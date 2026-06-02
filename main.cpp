@@ -15,11 +15,11 @@
 #endif
 
 void curataProiectileInactive(std::vector<Proiectil>& listaProiectile);
-void proceseazaInputJucator(char tasta, NavaJucator& albuquerque, std::vector<Proiectil>& listaProiectile, FlotaManager& flota, GameMaster& gm, bool esteNavaUpgrade, MotorGrafic& motor);
-void calculeazaColiziuniProiectile(std::vector<Proiectil>& listaProiectile, FlotaManager& flota, const std::vector<int>& vechiulYProiectile, GameMaster& gm, NavaJucator& albuquerque);
+void proceseazaInputJucator(char tasta, NavaJucator& albuquerque, std::vector<Proiectil>& listaProiectile, FlotaManager& flota, GameMaster& gm, bool esteNavaUpgrade, const MotorGrafic& motor);
+void calculeazaColiziuniProiectile(std::vector<Proiectil>& listaProiectile, FlotaManager& flota, const std::vector<int>& vechiulYProiectile, GameMaster& gm, const NavaJucator& albuquerque);
 void curataInamiciDistrusi(FlotaManager& flota, Statistici& stats, Realizari& progres);
 void updateObiecteSiMiscari(std::vector<Diamant>& listaDiamante, std::vector<PowerUp>& listaPowerUps, FlotaManager& flota, NavaJucator& albuquerque, Statistici& stats, GameMaster& gm);
-void genereazaEntitatiNoi(FlotaManager& flota, GameMaster& gm, NavaJucator& albuquerque, std::vector<PowerUp>& listaPowerUps, std::vector<Diamant>& listaDiamante, Statistici& stats);
+void genereazaEntitatiNoi(FlotaManager& flota, GameMaster& gm, const NavaJucator& albuquerque, std::vector<PowerUp>& listaPowerUps, std::vector<Diamant>& listaDiamante, const Statistici& stats)
 
 int main() {
     srand(static_cast<unsigned int>(time(0)));
@@ -78,8 +78,6 @@ int main() {
                 vechiulYProiectile.push_back(listaProiectile[i].getY());
                 listaProiectile[i].miscare();
             }
-
-            std::vector<Inamic*> lovitiAcum;
 
             calculeazaColiziuniProiectile(listaProiectile, flota, vechiulYProiectile, gm, albuquerque);
 

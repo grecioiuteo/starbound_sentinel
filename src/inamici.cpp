@@ -3,7 +3,7 @@
 int Inamic::totalInamiciDistrusi = 0;
 
 Inamic::Inamic(int v, int x, int y, char s)
-    : viata(v), loc(x, y), simbol(s), viataMax(v), armura(0), s_a_transformat(false) {}
+    : viata(v), armura(0), loc(x, y), simbol(s), viataMax(v), s_a_transformat(false) {}
 
 void Inamic::scadeViata(int dmg) {
     int dmgEfectiv = dmg - armura;
@@ -46,7 +46,7 @@ void FlotaManager::curataFlota() {
 }
 
 FlotaManager::FlotaManager(const FlotaManager& alta) {
-    for (auto* inamic : alta.naveFlota) {
+    for (const auto* inamic : alta.naveFlota) {
         naveFlota.push_back(inamic->clone());
     }
 }
