@@ -4,7 +4,6 @@
 #include <cstdlib>
 #include <ctime>
 
-// INCLUDE-URI AJUSTATE PENTRU VARIANTA 1 (main.cpp în rădăcină)
 #include "include/sistemJoc.h"
 #include "include/inamici.h"
 #include "include/navaJucator.h"
@@ -15,7 +14,6 @@
 #include <windows.h>
 #endif
 
-// DECLARAȚII FUNCȚII (Gruparea completă a codului)
 void curataProiectileInactive(std::vector<Proiectil>& listaProiectile);
 void proceseazaInputJucator(char tasta, NavaJucator& albuquerque, std::vector<Proiectil>& listaProiectile, FlotaManager& flota, GameMaster& gm, bool esteNavaUpgrade, MotorGrafic& motor);
 void calculeazaColiziuniProiectile(std::vector<Proiectil>& listaProiectile, FlotaManager& flota, const std::vector<int>& vechiulYProiectile, GameMaster& gm, NavaJucator& albuquerque);
@@ -59,14 +57,11 @@ int main() {
 
     while (albuquerque.esteOperationala()) {
         try {
-            // Pas 1: Ștergere proiectile inactive
             curataProiectileInactive(listaProiectile);
 
-            // Pas 2: Afișare scenă și status curent
             motor.scena(albuquerque, flota.getInamici(), listaDiamante, listaPowerUps, listaProiectile, stats.getScor());
             gm.showStatus();
 
-            // Pas 3: Citire comandă utilizator
             std::cout << "\nCe faci? (A/D/F/Space/Q): ";
             std::getline(std::cin, inputComplex);
             if (inputComplex.empty()) inputComplex = " ";
@@ -76,10 +71,8 @@ int main() {
 
             bool esteNavaUpgrade = (stats.getScor() >= 1500);
 
-            // Pas 4: Procesare input jucător (mișcare / atac)
             proceseazaInputJucator(tasta, albuquerque, listaProiectile, flota, gm, esteNavaUpgrade, motor);
 
-            // Pas 5: Memorare poziții vechi și mișcare lasere
             std::vector<int> vechiulYProiectile;
             for (size_t i = 0; i < listaProiectile.size(); ++i) {
                 vechiulYProiectile.push_back(listaProiectile[i].getY());
@@ -88,16 +81,12 @@ int main() {
 
             std::vector<Inamic*> lovitiAcum;
 
-            // Pas 6: Management coliziuni proiectile
             calculeazaColiziuniProiectile(listaProiectile, flota, vechiulYProiectile, gm, albuquerque);
 
-            // Pas 7: Curățare inamici morți din memorie
             curataInamiciDistrusi(flota, stats, progres);
 
-            // Pas 8: Mișcare și management obiecte (Diamante, Power-Up-uri, Mișcare Inamici către Bază)
             updateObiecteSiMiscari(listaDiamante, listaPowerUps, flota, albuquerque, stats, gm);
 
-            // Pas 9: Spawning dinamic inamici și obiecte speciale
             genereazaEntitatiNoi(flota, gm, albuquerque, listaPowerUps, listaDiamante, stats);
 
         }
@@ -118,17 +107,12 @@ int main() {
         }
     }
 
-    // Afișare rezultate finale de joc
     InterfataUtilizator::afiseazaGameOver(stats.getScor());
     std::cout << "\n--- STATISTICI FINALE MISIUNE ---\n";
     std::cout << "Raport nava jucator: " << albuquerque << "\n";
     std::cout << "Total inamici spulberati in misiune: " << Inamic::getTotalInamiciDistrusi() << "\n";
     return 0;
 }
-
-// ============================================================================
-// DEFINIȚII FUNCȚII (FIECARE LINIE CONSERVATĂ CU SFINȚENIE)
-// ============================================================================
 
 void curataProiectileInactive(std::vector<Proiectil>& listaProiectile) {
     for (auto itP = listaProiectile.begin(); itP != listaProiectile.end(); ) {
@@ -214,22 +198,18 @@ void calculeazaColiziuniProiectile(std::vector<Proiectil>& listaProiectile, Flot
                 }
 
                 if (seLovescul) {
-                    // 1. Verificăm mai întâi dacă inamicul lovit este un Cruiser ('W')
                     if (inamic->getSimbol() == 'W') {
-                        // Îi setăm viața direct la 0 ca să dispară din joc la următoarea curățare
                         inamic->scadeViata(inamic->getViata());
 
                         int cx = inamic->getX();
                         int cy = inamic->getY();
 
-                        // Spawnăm cele două nave 'v' în stânga și în dreapta (folosim distanța de 3 ca să rămână pe benzi)
                         if (cx - 3 >= 3) flota.adaugaInamic(new InamicScout(cx - 3, cy));
                         if (cx + 3 <= 24) flota.adaugaInamic(new InamicScout(cx + 3, cy));
 
                         gm.addEvent("💥 Cruiserul s-a divizat în două nave Scout!");
                     }
                     else {
-                        // 2. Pentru ceilalți inamici (Scout, Fregată), lăsăm comportamentul normal
                         inamic->scadeViata(albuquerque.getAtacTotal());
                         if (inamic->getViata() <= 0) {
                             gm.addEvent("Inamic spulberat!");
@@ -238,7 +218,6 @@ void calculeazaColiziuniProiectile(std::vector<Proiectil>& listaProiectile, Flot
                         }
                     }
 
-                    // Proiectilul dispare după impact
                     listaProiectile[i] = Proiectil(listaProiectile[i].getX(), -1);
                     break;
                 }

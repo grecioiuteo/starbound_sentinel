@@ -3,8 +3,8 @@
 
 #include <vector>
 #include <iostream>
-#include "EntitatiBaza.h"
-#include "NavaJucator.h"
+#include "entitatiBaza.h"
+#include "navaJucator.h"
 #include "Exceptii.h"
 
 class Inamic {
@@ -16,7 +16,7 @@ protected:
     int viataMax;
     bool s_a_transformat;
     
-    static int totalInamiciDistrusi; // Membrul static cerut de cerință
+    static int totalInamiciDistrusi;
 public:
     static int getTotalInamiciDistrusi() { return totalInamiciDistrusi; }
     static void incrementDistrusi() { totalInamiciDistrusi++; }
@@ -66,7 +66,7 @@ private:
 public:
     InamicFregata(int x, int y) : Inamic(15, x, y, 'F'), directieX(3), pasMecanic(0) {}
     virtual ~InamicFregata() override = default;
-    void miscareInamic() override; // Implementat în src/inamici.cpp
+    void miscareInamic() override;
     Inamic* clone() const override { return new InamicFregata(*this); }
 };
 
@@ -77,7 +77,7 @@ public:
     InamicMeteorit(int x, int y, const NavaJucator* nava)
         : Inamic(80, x, y, 'M'), navaTinta(nava) {}
     virtual ~InamicMeteorit() override = default;
-    void miscareInamic() override; // Implementat în src/inamici.cpp
+    void miscareInamic() override;
     Inamic* clone() const override { return new InamicMeteorit(*this); }
 };
 

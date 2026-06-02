@@ -3,9 +3,9 @@
 
 #include <vector>
 #include <string>
-#include "NavaJucator.h"
-#include "Inamici.h"
-#include "EntitatiBaza.h"
+#include "navaJucator.h"
+#include "inamici.h"
+#include "entitatiBaza.h"
 
 class MotorGrafic {
 private:

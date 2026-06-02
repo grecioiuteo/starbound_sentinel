@@ -3,7 +3,7 @@
 
 #include <string>
 #include <iostream>
-#include "EntitatiBaza.h"
+#include "entitatiBaza.h"
 #include "Exceptii.h"
 
 class Arsenal {
@@ -53,4 +53,4 @@ public:
     Arsenal& getArmament();
 };
 
-#endif //OOP_NAVAJUCATOR_H
+#endif
