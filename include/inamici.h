@@ -5,7 +5,7 @@
 #include <iostream>
 #include "entitatiBaza.h"
 #include "navaJucator.h"
-#include "Exceptii.h"
+#include "exceptii.h"
 
 class Inamic {
 protected:

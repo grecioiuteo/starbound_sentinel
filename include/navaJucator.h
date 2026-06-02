@@ -4,7 +4,7 @@
 #include <string>
 #include <iostream>
 #include "entitatiBaza.h"
-#include "Exceptii.h"
+#include "exceptii.h"
 
 class Arsenal {
 private:
