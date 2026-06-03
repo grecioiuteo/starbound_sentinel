@@ -65,3 +65,7 @@ void FlotaManager::adaugaInamic(Inamic* inamicNou) {
 std::vector<Inamic*>& FlotaManager::getInamici() {
     return naveFlota;
 }
+
+int Inamic::getTotalInamiciDistrusi() {
+    return totalInamiciDistrusi;
+}
