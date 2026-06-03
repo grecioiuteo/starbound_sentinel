@@ -18,7 +18,7 @@ protected:
     
     static int totalInamiciDistrusi;
 public:
-    static int getTotalInamiciDistrusi() { return totalInamiciDistrusi; }
+   // static int getTotalInamiciDistrusi() { return totalInamiciDistrusi; }
     static void incrementDistrusi() { totalInamiciDistrusi++; }
 
     Inamic(int v, int x, int y, char s);

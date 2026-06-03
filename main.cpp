@@ -19,8 +19,7 @@ void proceseazaInputJucator(char tasta, NavaJucator& albuquerque, std::vector<Pr
 void calculeazaColiziuniProiectile(std::vector<Proiectil>& listaProiectile, FlotaManager& flota, const std::vector<int>& vechiulYProiectile, GameMaster& gm, const NavaJucator& albuquerque);
 void curataInamiciDistrusi(FlotaManager& flota, Statistici& stats, Realizari& progres);
 void updateObiecteSiMiscari(std::vector<Diamant>& listaDiamante, std::vector<PowerUp>& listaPowerUps, FlotaManager& flota, NavaJucator& albuquerque, Statistici& stats, GameMaster& gm);
-void genereazaEntitatiNoi(FlotaManager& flota, GameMaster& gm, const NavaJucator& albuquerque, std::vector<PowerUp>& listaPowerUps, std::vector<Diamant>& listaDiamante, const Statistici& stats)
-
+void genereazaEntitatiNoi(FlotaManager& flota, GameMaster& gm, const NavaJucator& albuquerque, std::vector<PowerUp>& listaPowerUps, std::vector<Diamant>& listaDiamante, const Statistici& stats);
 int main() {
     srand(static_cast<unsigned int>(time(0)));
     GameMaster gm;
@@ -122,7 +121,7 @@ void curataProiectileInactive(std::vector<Proiectil>& listaProiectile) {
     }
 }
 
-void proceseazaInputJucator(char tasta, NavaJucator& albuquerque, std::vector<Proiectil>& listaProiectile, FlotaManager& flota, GameMaster& gm, bool esteNavaUpgrade, MotorGrafic& motor) {
+void proceseazaInputJucator(char tasta, NavaJucator& albuquerque, std::vector<Proiectil>& listaProiectile, FlotaManager& flota, GameMaster& gm, bool esteNavaUpgrade, const MotorGrafic& motor) {
     if (tasta == ' ') {
         gm.addEvent("Ai stat pe loc o tura.");
     }
@@ -159,7 +158,7 @@ void proceseazaInputJucator(char tasta, NavaJucator& albuquerque, std::vector<Pr
     }
 }
 
-void calculeazaColiziuniProiectile(std::vector<Proiectil>& listaProiectile, FlotaManager& flota, const std::vector<int>& vechiulYProiectile, GameMaster& gm, NavaJucator& albuquerque) {
+void calculeazaColiziuniProiectile(std::vector<Proiectil>& listaProiectile, FlotaManager& flota, const std::vector<int>& vechiulYProiectile, GameMaster& gm, const NavaJucator& albuquerque) {
     for (size_t i = 0; i < listaProiectile.size(); ++i) {
         if (listaProiectile[i].getY() <= 0) {
             listaProiectile[i] = Proiectil(listaProiectile[i].getX(), -1);
@@ -284,7 +283,8 @@ void updateObiecteSiMiscari(std::vector<Diamant>& listaDiamante, std::vector<Pow
     }
 }
 
-void genereazaEntitatiNoi(FlotaManager& flota, GameMaster& gm, NavaJucator& albuquerque, std::vector<PowerUp>& listaPowerUps, std::vector<Diamant>& listaDiamante, Statistici& stats) {
+void genereazaEntitatiNoi(FlotaManager& flota, GameMaster& gm, const NavaJucator& albuquerque, std::vector<PowerUp>& listaPowerUps, std::vector<Diamant>& listaDiamante, const Statistici& stats)
+{
     if (flota.getInamici().size() < 6 && (rand() % 100 < gm.getSpawnChance())) {
         int banda = 1 + (rand() % 8);
         int spawnX = banda * 3;
