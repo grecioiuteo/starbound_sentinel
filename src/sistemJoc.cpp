@@ -93,7 +93,7 @@ void MotorGrafic::scena(const NavaJucator& nava, const std::vector<Inamic*>& ina
 
     std::cout << BOLD << "\n ENTITĂȚI SPAȚIALE:\n" << RESET
               << "   " << GREEN << "N" << RESET << " = Nava Ta (Interceptor)\n"
-              << "   " << RED << "v" << RESET << " = Inamic Scout (Rapid) | " << BOLD << RED << "W" << RESET << " = Cruiser (Scut Greu) | " << MAGENTA << "F" << RESET << " = Fregată\n"
+              << "   " << RED << "v" << RESET << " = Inamic Scout (Rapid) | " << BOLD << RED << "W" << RESET << " = Cruiser (Scut Greu) | " << MAGENTA << "F" << RESET << " = Fregată | " << BOLD << MAGENTA << "M" << RESET << " = Meteorit (Urmăritor)\n"
               << "   " << YELLOW << "*" << RESET << " = Diamant (+150 Pcte)  | " << CYAN << "P" << RESET << " = Kit Reparații (+Scut/HP)\n"
               << "   " << YELLOW << "|" << RESET << " = Proiectil Laser\n";
 

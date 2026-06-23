@@ -98,14 +98,20 @@ public:
 enum class TipInamic { Scout, Cruiser, Fregata, Meteorit };
 class InamicFactory {
 public:
-    static Inamic* creeazaInamic(TipInamic tip, int x, int y, const NavaJucator* nava = nullptr) {
-        switch (tip) {
-            case TipInamic::Scout:    return new InamicScout(x, y);
-            case TipInamic::Cruiser:  return new InamicCruiser(x, y);
-            case TipInamic::Fregata:  return new InamicFregata(x, y);
-            case TipInamic::Meteorit: return new InamicMeteorit(x, y, nava);
-            default: return nullptr;
+    static Inamic* creeazaInamic(const std::string& tip, int startX, int startY = 0, const NavaJucator* navaTinta = nullptr) {
+        if (tip == "Scout") {
+            return new InamicScout(startX, startY);
         }
+        else if (tip == "Cruiser") {
+            return new InamicCruiser(startX, startY);
+        }
+        else if (tip == "Fregata") {
+            return new InamicFregata(startX, startY);
+        }
+        else if (tip == "Meteorit") {
+            return new InamicMeteorit(startX, startY, navaTinta);
+        }
+        return nullptr;
     }
 };
 

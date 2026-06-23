@@ -197,13 +197,10 @@ void calculeazaColiziuniProiectile(std::vector<Proiectil>& listaProiectile, Flot
                 if (seLovescul) {
                     if (inamic->getSimbol() == 'W') {
                         inamic->scadeViata(inamic->getViata());
-
                         int cx = inamic->getX();
                         int cy = inamic->getY();
-
-                        if (cx - 3 >= 3) flota.adaugaInamic(InamicFactory::creeazaInamic(TipInamic::Scout, cx - 3, cy));
-                        if (cx + 3 <= 24) flota.adaugaInamic(InamicFactory::creeazaInamic(TipInamic::Scout, cx + 3, cy));
-
+                        if (cx - 3 >= 3) flota.adaugaInamic(InamicFactory::creeazaInamic("Scout", cx - 3, cy));
+                        if (cx + 3 <= 24) flota.adaugaInamic(InamicFactory::creeazaInamic("Scout", cx + 3, cy));
                         gm.addEvent("💥 Cruiserul s-a divizat în două nave Scout!");
                     }
                     else {
@@ -289,17 +286,17 @@ void genereazaEntitatiNoi(FlotaManager& flota, GameMaster& gm, const NavaJucator
         int tipRandom = rand() % 3;
 
         if (tipRandom == 0) {
-            flota.adaugaInamic(InamicFactory::creeazaInamic(TipInamic::Scout, spawnX, 1));
+            flota.adaugaInamic(InamicFactory::creeazaInamic("Scout", spawnX));
         } else if (tipRandom == 1) {
-            flota.adaugaInamic(InamicFactory::creeazaInamic(TipInamic::Cruiser, spawnX, 1));
+            flota.adaugaInamic(InamicFactory::creeazaInamic("Cruiser", spawnX));
         } else {
-            flota.adaugaInamic(InamicFactory::creeazaInamic(TipInamic::Fregata, spawnX, 1));
+            flota.adaugaInamic(InamicFactory::creeazaInamic("Fregata", spawnX));
         }
 
         if (flota.getInamici().size() < 6 && (rand() % 100 < 30)) {
             int bandaMeteorit = 1 + (rand() % 8);
             if (esteInScena(bandaMeteorit * 3, 30)) {
-                flota.adaugaInamic(InamicFactory::creeazaInamic(TipInamic::Meteorit, bandaMeteorit * 3, 1, &albuquerque));
+                flota.adaugaInamic(InamicFactory::creeazaInamic("Meteorit", bandaMeteorit * 3,0, &albuquerque));
             }
         }
     }
