@@ -2,6 +2,7 @@
 #define ENTITATI_BAZA_H
 
 #include <iostream>
+#include <vector>
 
 class Pozitie {
 private:
@@ -50,6 +51,35 @@ public:
     int getX() const;
     int getY() const;
     bool esteActiv() const;
+};
+
+template <typename T>
+bool esteInScena(T coordonata, T limitaMaxima) {
+    return (coordonata >= 0 && coordonata < limitaMaxima);
+}
+template <typename T>
+class ResourceCollection {
+private:
+    std::vector<T> elemente;
+public:
+    void adauga(const T& element) {
+        elemente.push_back(element);
+    }
+
+    std::vector<T>& getElemente() {
+        return elemente;
+    }
+
+    void actualizeazaPozitii(int limitaY) {
+        for (auto it = elemente.begin(); it != elemente.end(); ) {
+            it->miscare();
+            if (it->getY() >= limitaY) {
+                it = elemente.erase(it);
+            } else {
+                ++it;
+            }
+        }
+    }
 };
 
 #endif

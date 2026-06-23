@@ -18,7 +18,6 @@ protected:
     
     static int totalInamiciDistrusi;
 public:
-   // static int getTotalInamiciDistrusi() { return totalInamiciDistrusi; }
     static int getTotalInamiciDistrusi();
     static void incrementDistrusi() { totalInamiciDistrusi++; }
 
@@ -94,6 +93,20 @@ public:
     void adaugaInamic(Inamic* inamicNou);
     std::vector<Inamic*>& getInamici();
     void curataFlota();
+};
+
+enum class TipInamic { Scout, Cruiser, Fregata, Meteorit };
+class InamicFactory {
+public:
+    static Inamic* creeazaInamic(TipInamic tip, int x, int y, const NavaJucator* nava = nullptr) {
+        switch (tip) {
+            case TipInamic::Scout:    return new InamicScout(x, y);
+            case TipInamic::Cruiser:  return new InamicCruiser(x, y);
+            case TipInamic::Fregata:  return new InamicFregata(x, y);
+            case TipInamic::Meteorit: return new InamicMeteorit(x, y, nava);
+            default: return nullptr;
+        }
+    }
 };
 
 #endif

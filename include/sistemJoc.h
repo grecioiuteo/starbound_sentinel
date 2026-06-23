@@ -37,8 +37,16 @@ private:
     int level;
     int pragNivel;
     std::vector<std::string> log;
-public:
     GameMaster();
+    GameMaster(const GameMaster&) = delete;
+    GameMaster& operator=(const GameMaster&) = delete;
+
+public:
+    static GameMaster& getInstance() {
+        static GameMaster instance;
+        return instance;
+    }
+
     void update(int scorActual);
     void addEvent(const std::string& msg);
     void showStatus();

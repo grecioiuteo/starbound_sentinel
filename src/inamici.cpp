@@ -1,4 +1,5 @@
 #include "../include/inamici.h"
+#include <utility>
 
 int Inamic::totalInamiciDistrusi = 0;
 
